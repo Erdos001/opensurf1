@@ -82,10 +82,10 @@ void drawIpoints(IplImage *img, vector<Ipoint> &ipts, int tailSize)
     s = ((9.0f/1.2f) * ipt->scale) / 3.0f;
     o = ipt->orientation;
     lap = ipt->laplacian;
-    r1 = cvRound(ipt->y);
-    c1 = cvRound(ipt->x);
-    c2 = cvRound(s * cos(o)) + c1;
-    r2 = cvRound(s * sin(o)) + r1;
+    r1 = fRound(ipt->y);
+    c1 = fRound(ipt->x);
+    c2 = fRound(s * cos(o)) + c1;
+    r2 = fRound(s * sin(o)) + r1;
 
     if (o) // Green line indicates orientation
       cvLine(img, cvPoint(c1, r1), cvPoint(c2, r2), cvScalar(0, 255, 0));
@@ -94,11 +94,11 @@ void drawIpoints(IplImage *img, vector<Ipoint> &ipts, int tailSize)
 
     if (lap >= 0)
     { // Blue circles indicate light blobs on dark backgrounds
-      cvCircle(img, cvPoint(c1,r1), cvRound(s), cvScalar(255, 0, 0),1);
+      cvCircle(img, cvPoint(c1,r1), fRound(s), cvScalar(255, 0, 0),1);
     }
     else
     { // Red circles indicate light blobs on dark backgrounds
-      cvCircle(img, cvPoint(c1,r1), cvRound(s), cvScalar(0, 0, 255),1);
+      cvCircle(img, cvPoint(c1,r1), fRound(s), cvScalar(0, 0, 255),1);
     }
 
     // Draw motion from ipoint dx and dy
@@ -122,10 +122,10 @@ void drawIpoint(IplImage *img, Ipoint &ipt)
   s = ((9.0f/1.2f) * ipt.scale) / 3.0f;
   o = ipt.orientation;
   lap = ipt.laplacian;
-  r1 = cvRound(ipt.y);
-  c1 = cvRound(ipt.x);
-  c2 = cvRound(s * cos(o)) + c1;
-  r2 = cvRound(s * sin(o)) + r1;
+  r1 = fRound(ipt.y);
+  c1 = fRound(ipt.x);
+  c2 = fRound(s * cos(o)) + c1;
+  r2 = fRound(s * sin(o)) + r1;
 
   // Green line indicates orientation
   if (o) // Green line indicates orientation
@@ -135,11 +135,11 @@ void drawIpoint(IplImage *img, Ipoint &ipt)
 
   if (lap >= 0)
   { // Blue circles indicate light blobs on dark backgrounds
-    cvCircle(img, cvPoint(c1,r1), cvRound(s), cvScalar(255, 0, 0),1);
+    cvCircle(img, cvPoint(c1,r1), fRound(s), cvScalar(255, 0, 0),1);
   }
   else
   { // Red circles indicate light blobs on dark backgrounds
-    cvCircle(img, cvPoint(c1,r1), cvRound(s), cvScalar(0, 0, 255),1);
+    cvCircle(img, cvPoint(c1,r1), fRound(s), cvScalar(0, 0, 255),1);
   }
 }
 
@@ -153,11 +153,11 @@ void drawPoint(IplImage *img, Ipoint &ipt)
 
   s = 3;
   o = ipt.orientation;
-  r1 = cvRound(ipt.y);
-  c1 = cvRound(ipt.x);
+  r1 = fRound(ipt.y);
+  c1 = fRound(ipt.x);
 
-  cvCircle(img, cvPoint(c1,r1), cvRound(s), cvScalar(0, 255, 0), -1);
-  cvCircle(img, cvPoint(c1,r1), cvRound(s+1), cvScalar(255, 0,0), 2);
+  cvCircle(img, cvPoint(c1,r1), fRound(s), cvScalar(0, 255, 0), -1);
+  cvCircle(img, cvPoint(c1,r1), fRound(s+1), cvScalar(255, 0,0), 2);
 
 }
 
@@ -173,11 +173,11 @@ void drawPoints(IplImage *img, vector<Ipoint> &ipts)
   {
     s = 3;
     o = ipts[i].orientation;
-    r1 = cvRound(ipts[i].y);
-    c1 = cvRound(ipts[i].x);
+    r1 = fRound(ipts[i].y);
+    c1 = fRound(ipts[i].x);
 
-    cvCircle(img, cvPoint(c1,r1), cvRound(s), cvScalar(0, 255, 0), -1);
-    cvCircle(img, cvPoint(c1,r1), cvRound(s+1), cvScalar(255, 0,0), 2);
+    cvCircle(img, cvPoint(c1,r1), fRound(s), cvScalar(0, 255, 0), -1);
+    cvCircle(img, cvPoint(c1,r1), fRound(s+1), cvScalar(255, 0,0), 2);
   }
 }
 
@@ -191,13 +191,13 @@ void drawWindows(IplImage *img, vector<Ipoint> &ipts)
   int x, y;
   CvPoint2D32f src[4];
 
-  for(int i = 0; i < cvRound(ipts.size()); i++) 
+  for(int i = 0; i < fRound(ipts.size()); i++) 
   {
     ipt = &ipts.at(i);
     s = (10 * ipt->scale);
     o = ipt->orientation;
-    y = cvRound(ipt->y);
-    x = cvRound(ipt->x);
+    y = fRound(ipt->y);
+    x = fRound(ipt->x);
     cd = cos(o);
     sd = sin(o);
 
@@ -207,21 +207,21 @@ void drawWindows(IplImage *img, vector<Ipoint> &ipts)
     src[3].x=sd*-s+cd*s+x;  src[3].y=-cd*-s+sd*s+y;
 
     if (o) // Draw orientation line
-      cvLine(img, cvPoint(cvRound(x), cvRound(y)), 
-      cvPoint(cvRound(s*cd + x), cvRound(s*sd + y)), cvScalar(0, 255, 0),1);
+      cvLine(img, cvPoint(fRound(x), fRound(y)), 
+      cvPoint(fRound(s*cd + x), fRound(s*sd + y)), cvScalar(0, 255, 0),1);
     else  // Green dot if using upright version
       cvCircle(img, cvPoint(x,y), 1, cvScalar(0, 255, 0),-1);
 
 
     // Draw box window around the point
-    cvLine(img, cvPoint(cvRound(src[0].x), cvRound(src[0].y)), 
-      cvPoint(cvRound(src[1].x), cvRound(src[1].y)), cvScalar(255, 0, 0),2);
-    cvLine(img, cvPoint(cvRound(src[1].x), cvRound(src[1].y)), 
-      cvPoint(cvRound(src[2].x), cvRound(src[2].y)), cvScalar(255, 0, 0),2);
-    cvLine(img, cvPoint(cvRound(src[2].x), cvRound(src[2].y)), 
-      cvPoint(cvRound(src[3].x), cvRound(src[3].y)), cvScalar(255, 0, 0),2);
-    cvLine(img, cvPoint(cvRound(src[3].x), cvRound(src[3].y)), 
-      cvPoint(cvRound(src[0].x), cvRound(src[0].y)), cvScalar(255, 0, 0),2);
+    cvLine(img, cvPoint(fRound(src[0].x), fRound(src[0].y)), 
+      cvPoint(fRound(src[1].x), fRound(src[1].y)), cvScalar(255, 0, 0),2);
+    cvLine(img, cvPoint(fRound(src[1].x), fRound(src[1].y)), 
+      cvPoint(fRound(src[2].x), fRound(src[2].y)), cvScalar(255, 0, 0),2);
+    cvLine(img, cvPoint(fRound(src[2].x), fRound(src[2].y)), 
+      cvPoint(fRound(src[3].x), fRound(src[3].y)), cvScalar(255, 0, 0),2);
+    cvLine(img, cvPoint(fRound(src[3].x), fRound(src[3].y)), 
+      cvPoint(fRound(src[0].x), fRound(src[0].y)), cvScalar(255, 0, 0),2);
 
   }
 }
@@ -319,7 +319,7 @@ void loadSurf(char *filename, vector<Ipoint> &ipts)
 //-------------------------------------------------------
 
 //! Round float to nearest integer
-int fRound(float flt)
+inline int fRound(float flt)
 {
   return (int) floor(flt+0.5f);
 }

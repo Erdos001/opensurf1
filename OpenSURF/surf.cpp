@@ -78,7 +78,7 @@ void Surf::getOrientation()
 {
   Ipoint *ipt = &ipts.at(index);
   float gauss, scale = ipt->scale;
-  int s = cvRound(scale), r = cvRound(ipt->y), c = cvRound(ipt->x);
+  int s = fRound(scale), r = fRound(ipt->y), c = fRound(ipt->x);
   std::vector<float> resX, resY, Ang;
 
   // calculate haar responses for points within radius of 6*scale
@@ -149,8 +149,8 @@ void Surf::getDescriptor()
   
   Ipoint *ipt = &ipts.at(index);
   scale = ipt->scale;
-  x = cvRound(ipt->x);
-  y = cvRound(ipt->y);  
+  x = fRound(ipt->x);
+  y = fRound(ipt->y);  
   co = cos(ipt->orientation);
   si = sin(ipt->orientation);
   desc = ipt->descriptor;
@@ -166,13 +166,13 @@ void Surf::getDescriptor()
         for (int l = j; l < j + 5; ++l) 
         {
           // Get coords of sample point on the rotated axis
-          sample_x = cvRound(x + (-l*scale*si + k*scale*co));
-          sample_y = cvRound(y + ( l*scale*co + k*scale*si));
+          sample_x = fRound(x + (-l*scale*si + k*scale*co));
+          sample_y = fRound(y + ( l*scale*co + k*scale*si));
 
           // Get the gaussian weighted x and y responses
           gauss = gaussian(k*scale, l*scale, 3.3f*scale);  
-          rx = gauss * haarX(sample_y, sample_x, 2*cvRound(scale));
-          ry = gauss * haarY(sample_y, sample_x, 2*cvRound(scale));
+          rx = gauss * haarX(sample_y, sample_x, 2*fRound(scale));
+          ry = gauss * haarY(sample_y, sample_x, 2*fRound(scale));
 
           // Get the gaussian weighted x and y responses on rotated axis
           rrx = -rx*si + ry*co;
@@ -214,8 +214,8 @@ void Surf::getUprightDescriptor()
 
   Ipoint *ipt = &ipts.at(index);
   scale = ipt->scale;
-  y = cvRound(ipt->y);  
-  x = cvRound(ipt->x);
+  y = fRound(ipt->y);  
+  x = fRound(ipt->x);
   desc = ipt->descriptor;
 
   // Calculate descriptor for this interest point
@@ -230,8 +230,8 @@ void Surf::getUprightDescriptor()
         {
           // get Gaussian weighted x and y responses
           gauss = gaussian(k*scale, l*scale, 3.3f*scale);  
-          rx = gauss * haarX(k*scale+y, l*scale+x, 2*cvRound(scale));
-          ry = gauss * haarY(k*scale+y, l*scale+x, 2*cvRound(scale));
+          rx = gauss * haarX(k*scale+y, l*scale+x, 2*fRound(scale));
+          ry = gauss * haarY(k*scale+y, l*scale+x, 2*fRound(scale));
 
           dx += rx;
           dy += ry;
