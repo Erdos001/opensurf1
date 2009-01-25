@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenSURF 1.2", "OpenSURF 1.2\OpenSURF 1.2.vcproj", "{A6BDDB78-794B-409C-A8E5-5D6B72E7FFEA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenSURF", "OpenSURF\OpenSURF.vcproj", "{45C52AD1-9AD2-46BC-96A2-E302AF7CC982}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +9,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A6BDDB78-794B-409C-A8E5-5D6B72E7FFEA}.Debug|Win32.ActiveCfg = Debug|Win32
-		{A6BDDB78-794B-409C-A8E5-5D6B72E7FFEA}.Debug|Win32.Build.0 = Debug|Win32
-		{A6BDDB78-794B-409C-A8E5-5D6B72E7FFEA}.Release|Win32.ActiveCfg = Release|Win32
-		{A6BDDB78-794B-409C-A8E5-5D6B72E7FFEA}.Release|Win32.Build.0 = Release|Win32
+		{45C52AD1-9AD2-46BC-96A2-E302AF7CC982}.Debug|Win32.ActiveCfg = Debug|Win32
+		{45C52AD1-9AD2-46BC-96A2-E302AF7CC982}.Debug|Win32.Build.0 = Debug|Win32
+		{45C52AD1-9AD2-46BC-96A2-E302AF7CC982}.Release|Win32.ActiveCfg = Release|Win32
+		{45C52AD1-9AD2-46BC-96A2-E302AF7CC982}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
