@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="OpenSURF 1.2"
+	Name="OpenSURF"
 	ProjectGUID="{A6BDDB78-794B-409C-A8E5-5D6B72E7FFEA}"
 	RootNamespace="OpenSURF12"
 	Keyword="Win32Proj"
