@@ -150,7 +150,7 @@ int mainMatch(void)
 
     // Detect and describe interest points in the image
     ref_ipts = ipts;
-    surfDetDes(img, ipts, false, 3, 4, 2, 0.0008f);
+    surfDetDes(img, ipts, false, 3, 4, 2, 0.0004f);
 
     // Fill match vector
     getMatches(ipts,ref_ipts,matches);
@@ -160,9 +160,9 @@ int mainMatch(void)
         drawIpoint(img, matches[i].first); 
       }
       drawPoints(img, ipts);
+      std::cout << matches.size() / (float)(min(ipts.size(), ref_ipts.size())+1);
+      std::cout << "    " << matches.size() << "   " << ipts.size() << "\n";
     }
-
-    //drawIpoints(img, ipts);
 
     // Display the result
     cvShowImage("OpenSURF", img);
@@ -207,7 +207,7 @@ void getMatches(IpVec &ipts1, IpVec &ipts2, IpPairVec &matches)
     }
 
     // if closest match has a d1:d2 ratio < 0.7 ipoints are a match
-    if(d1/d2 < 0.8) 
+    if(d1/d2 < 0.7) 
     { 
       matches.push_back(std::make_pair(ipts1[i], *match));
     }
