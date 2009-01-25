@@ -151,7 +151,7 @@ void drawPoint(IplImage *img, Ipoint &ipt)
   float s, o;
   int r1, c1;
 
-  s = 4;
+  s = 3;
   o = ipt.orientation;
   r1 = cvRound(ipt.y);
   c1 = cvRound(ipt.x);
@@ -171,7 +171,7 @@ void drawPoints(IplImage *img, vector<Ipoint> &ipts)
 
   for(unsigned int i = 0; i < ipts.size(); i++) 
   {
-    s = 10;
+    s = 3;
     o = ipts[i].orientation;
     r1 = cvRound(ipts[i].y);
     c1 = cvRound(ipts[i].x);
