@@ -19,7 +19,7 @@ typedef std::vector<std::pair<Ipoint, Ipoint>> IpPairVec;
 //  - 1 and supply image path to run on static image
 //  - 2 to capture from a webcam
 //  - 3 to match features between images
-#define PROCEDURE 2
+#define PROCEDURE 3
 
 //-------------------------------------------------------
 
@@ -140,8 +140,7 @@ int mainMatch(void)
   // Declare Ipoints and other stuff
   IpVec ipts, ref_ipts;
   IpPairVec matches;
-  IplImage *img=cvLoadImage("test.jpg");
-  surfDetDes(img, ref_ipts, false, 3, 4, 2, 0.0008f);
+  IplImage *img;
 
   // Main capture loop
   while( 1 ) 
@@ -150,6 +149,7 @@ int mainMatch(void)
     img = cvQueryFrame(capture);
 
     // Detect and describe interest points in the image
+    ref_ipts = ipts;
     surfDetDes(img, ipts, false, 3, 4, 2, 0.0008f);
 
     // Fill match vector
@@ -157,8 +157,9 @@ int mainMatch(void)
     {       
       for (int i = 0; i < matches.size(); ++i)
       {
-        drawIpoint(img, matches[i].first);
+        drawIpoint(img, matches[i].first); 
       }
+      drawPoints(img, ipts);
     }
 
     //drawIpoints(img, ipts);

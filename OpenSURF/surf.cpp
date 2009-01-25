@@ -102,7 +102,7 @@ void Surf::getOrientation()
   float ang1, ang2, ang;
 
   // loop slides pi/3 window around feature point
-  for(ang1 = 0; ang1 < 2*pi;  ang1+=0.2f) {
+  for(ang1 = 0; ang1 < 2*pi;  ang1+=0.1f) {
     ang2 = ( ang1+pi/3.0f > 2*pi ? ang1-5.0f*pi/3.0f : ang1+pi/3.0f);
     sumX = sumY = 0; 
     for(unsigned int k = 0; k < Ang.size(); k++) 
