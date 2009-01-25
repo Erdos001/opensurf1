@@ -111,7 +111,7 @@ void FastHessian::getIpoints()
 
   for(int o=0; o < octaves; o++) 
   {
-    // for each octave double the sampling step of the previous
+    // For each octave double the sampling step of the previous
     int step = init_sample * fRound(pow(2.0f,o));
     int border = border_cache[o];
 
