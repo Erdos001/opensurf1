@@ -148,7 +148,7 @@ void Surf::getDescriptor()
   float gauss, rx, ry, rrx, rry, sample_x, sample_y, len=0;
   
   Ipoint *ipt = &ipts.at(index);
-  scale = ipt->scale;
+  scale = fRound(ipt->scale);
   x = fRound(ipt->x);
   y = fRound(ipt->y);  
   co = cos(ipt->orientation);

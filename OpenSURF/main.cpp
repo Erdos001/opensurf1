@@ -150,7 +150,7 @@ int mainMatch(void)
 
     // Detect and describe interest points in the image
     ref_ipts = ipts;
-    surfDetDes(img, ipts, false, 3, 4, 2, 0.0004f);
+    surfDetDes(img, ipts, true, 3, 4, 2, 0.0004f);
 
     // Fill match vector
     getMatches(ipts,ref_ipts,matches);
@@ -158,6 +158,8 @@ int mainMatch(void)
       for (int i = 0; i < matches.size(); ++i)
       {
         drawIpoint(img, matches[i].first); 
+        cvLine(img, cvPoint(matches[i].first.x,matches[i].first.y),
+                    cvPoint(matches[i].second.x,matches[i].second.y), cvScalar(255,255,255),1);
       }
       drawPoints(img, ipts);
       std::cout << matches.size() / (float)(min(ipts.size(), ref_ipts.size())+1);
