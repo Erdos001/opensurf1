@@ -93,8 +93,9 @@ void FastHessian::setIntImage(IplImage *img)
 
     // Allocate space for determinant of hessian pyramid 
     if (m_det) delete [] m_det;
-    m_det = new float [octaves*intervals*i_width*i_height];
-    memset(m_det,0,sizeof(m_det));
+    const int m_det_size = octaves*intervals*i_width*i_height;
+    m_det = new float [m_det_size];
+    memset(m_det,0,m_det_size*sizeof(float));
   }
 }
 
