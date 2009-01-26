@@ -19,7 +19,7 @@ using namespace std;
 
 //-------------------------------------------------------
 // pre calculated lobe sizes
-static const int lobe_cache [] = {3,5,7,9,  5,9,13,17,  9,17,25,33,  17,33,49,65};
+static const int lobe_cache [] = {3,5,7,9,5,9,13,17,9,17,25,33,17,33,49,65};
 static const int lobe_cache_unique [] = {3,5,7,9,13,17,25,33,49,65};
 static const int lobe_map [] = {0,1,2,3,1,3,4,5,3,5,6,7,5,7,8,9};
 static const int border_cache [] = {14,26,50,98}; 

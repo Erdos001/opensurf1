@@ -16,6 +16,12 @@
 #include <time.h>
 using namespace std;
 
+static const int NCOLOURS = 8;
+static const CvScalar COLOURS [] = {cvScalar(255,0,0), cvScalar(0,255,0), 
+                                    cvScalar(0,0,255), cvScalar(255,255,0),
+                                    cvScalar(0,255,255), cvScalar(255,0,255),
+                                    cvScalar(255,255,255), cvScalar(0,0,0)};
+
 //-------------------------------------------------------
 
 //! Display error message and terminate program
@@ -156,8 +162,8 @@ void drawPoint(IplImage *img, Ipoint &ipt)
   r1 = fRound(ipt.y);
   c1 = fRound(ipt.x);
 
-  cvCircle(img, cvPoint(c1,r1), fRound(s), cvScalar(0, 255, 0), -1);
-  cvCircle(img, cvPoint(c1,r1), fRound(s+1), cvScalar(255, 0,0), 2);
+  cvCircle(img, cvPoint(c1,r1), fRound(s), COLOURS[ipt.clusterIndex%NCOLOURS], -1);
+  cvCircle(img, cvPoint(c1,r1), fRound(s+1), COLOURS[(ipt.clusterIndex+1)%NCOLOURS], 2);
 
 }
 
@@ -176,8 +182,8 @@ void drawPoints(IplImage *img, vector<Ipoint> &ipts)
     r1 = fRound(ipts[i].y);
     c1 = fRound(ipts[i].x);
 
-    cvCircle(img, cvPoint(c1,r1), fRound(s), cvScalar(0, 255, 0), -1);
-    cvCircle(img, cvPoint(c1,r1), fRound(s+1), cvScalar(255, 0,0), 2);
+    cvCircle(img, cvPoint(c1,r1), fRound(s), COLOURS[ipts[i].clusterIndex%NCOLOURS], -1);
+    cvCircle(img, cvPoint(c1,r1), fRound(s+1), COLOURS[(ipts[i].clusterIndex+1)%NCOLOURS], 2);
   }
 }
 

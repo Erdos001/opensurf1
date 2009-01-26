@@ -67,7 +67,7 @@ void Kmeans::Run(IpVec &ipts, int clusters, bool init)
 
   if (init) InitRandomClusters(clusters);
   
-  while (AssignToClusters())
+  while (AssignToClusters());
   {
     RepositionClusters();
   }
@@ -130,11 +130,11 @@ bool Kmeans::AssignToClusters()
 
 void Kmeans::RepositionClusters()
 {
-  int x, y, count;
+  int x, y, dx, dy, count;
 
   for (unsigned int i = 0; i < clusters.size(); ++i)
   {
-    x = y = 0;
+    x = y = dx = dy = 0;
     count = 1;
 
     for (unsigned int j = 0; j < ipts.size(); ++j)
@@ -143,12 +143,16 @@ void Kmeans::RepositionClusters()
       {
         x += ipts[j].x;
         y += ipts[j].y;
+        dx += ipts[j].dx;
+        dy += ipts[j].dy;
         ++count;
       }
     }
 
     clusters[i].x = x/count;
     clusters[i].y = y/count;
+    clusters[i].dx = dx/count;
+    clusters[i].dy = dy/count;
   }
 }
 
@@ -156,8 +160,10 @@ void Kmeans::RepositionClusters()
 
 float Kmeans::Distance(Ipoint &ip1, Ipoint &ip2)
 {
-  return sqrt(pow(ip1.x - ip2.x,2) 
-        + pow(ip1.y - ip2.y, 2));;
+  return sqrt(/*pow(ip1.x - ip2.x, 2) 
+            + pow(ip1.y - ip2.y, 2)*/
+            + pow(ip1.dx - ip2.dx, 2) 
+            + pow(ip1.dy - ip2.dy, 2));
 }
 
 //-------------------------------------------------------
