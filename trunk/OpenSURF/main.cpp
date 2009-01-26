@@ -9,6 +9,7 @@
 ************************************************************/
 
 #include "surflib.h"
+#include "kmeans.h"
 #include <ctime>
 #include <iostream>
 
@@ -19,13 +20,15 @@ typedef std::vector<std::pair<Ipoint, Ipoint>> IpPairVec;
 //  - 1 and supply image path to run on static image
 //  - 2 to capture from a webcam
 //  - 3 to match features between images
-#define PROCEDURE 3
+//  - 4 to cluster moving features
+#define PROCEDURE 4
 
 //-------------------------------------------------------
 
 int mainImage(const char *filename);
 int mainVideo(void);
 int mainMatch(void);
+int mainMotionCluster(void);
 void getMatches(IpVec &ipts1, IpVec &ipts2, IpPairVec &matches);
 float compareIpoints(Ipoint &ip1, Ipoint &ip2);
 
@@ -36,6 +39,7 @@ int main()
   if (PROCEDURE == 1) return mainImage("building.pgm");//"test.png");
   if (PROCEDURE == 2) return mainVideo();
   if (PROCEDURE == 3) return mainMatch();
+  if (PROCEDURE == 4) return mainMotionCluster();
 }
 
 //-------------------------------------------------------
@@ -150,7 +154,7 @@ int mainMatch(void)
 
     // Detect and describe interest points in the image
     ref_ipts = ipts;
-    surfDetDes(img, ipts, true, 3, 4, 2, 0.0004f);
+    surfDetDes(img, ipts, true, 3, 4, 2, 0.00004f);
 
     // Fill match vector
     getMatches(ipts,ref_ipts,matches);
@@ -161,11 +165,64 @@ int mainMatch(void)
         cvLine(img, cvPoint(matches[i].first.x,matches[i].first.y),
                     cvPoint(matches[i].second.x,matches[i].second.y), cvScalar(255,255,255),1);
       }
-      drawPoints(img, ipts);
-      std::cout << matches.size() / (float)(min(ipts.size(), ref_ipts.size())+1);
-      std::cout << "    " << matches.size() << "   " << ipts.size() << "\n";
     }
 
+    // Display the result
+    cvShowImage("OpenSURF", img);
+
+    // If ESC key pressed exit loop
+    if( (cvWaitKey(10) & 255) == 27 ) break;
+  }
+
+  // Release the capture device
+  cvReleaseCapture( &capture );
+  cvDestroyWindow( "OpenSURF" );
+  return 0;
+}
+
+//-------------------------------------------------------
+
+int mainMotionCluster(void)
+{
+  // Initialise capture device
+  CvCapture* capture = cvCaptureFromCAM( CV_CAP_ANY );
+  if(!capture) error("No Capture");
+
+  // Create a window 
+  cvNamedWindow("OpenSURF", CV_WINDOW_AUTOSIZE );
+
+  // Declare Ipoints and other stuff
+  IpVec ipts, ref_ipts, motion;
+  IpPairVec matches;
+  IplImage *img;
+  Kmeans km;
+  bool init = true;
+
+  // Main capture loop
+  while( 1 ) 
+  {
+    // Grab frame from the capture source
+    img = cvQueryFrame(capture);
+
+    // Detect and describe interest points in the image
+    ref_ipts = ipts;
+    surfDetDes(img, ipts, true, 4, 4, 2, 0.0001f);
+
+    // Fill match vector
+    motion.clear();
+    getMatches(ipts,ref_ipts,matches);
+    for (int i = 0; i < matches.size(); ++i) 
+    {
+      Ipoint ip;
+      ip = matches[i].first;
+      ip.dx = matches[i].first.x - matches[i].second.x;
+      ip.dy = matches[i].first.y - matches[i].second.y;
+      motion.push_back(ip);
+    }
+    km.Run(motion, 2, init);
+    if (matches.size()) init = false;
+    drawPoints(img, km.ipts);
+    
     // Display the result
     cvShowImage("OpenSURF", img);
 
@@ -209,7 +266,7 @@ void getMatches(IpVec &ipts1, IpVec &ipts2, IpPairVec &matches)
     }
 
     // if closest match has a d1:d2 ratio < 0.7 ipoints are a match
-    if(d1/d2 < 0.7) 
+    if(d1/d2 < 0.65) 
     { 
       matches.push_back(std::make_pair(ipts1[i], *match));
     }

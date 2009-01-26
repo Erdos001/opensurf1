@@ -170,7 +170,7 @@ void Surf::getDescriptor()
           sample_y = fRound(y + ( l*scale*co + k*scale*si));
 
           // Get the gaussian weighted x and y responses
-          gauss = gaussian(k*scale, l*scale, 3.3f*scale);  
+          gauss = gaussian(k, l, 3.3f*scale);  
           rx = gauss * haarX(sample_y, sample_x, 2*fRound(scale));
           ry = gauss * haarY(sample_y, sample_x, 2*fRound(scale));
 
@@ -210,7 +210,7 @@ void Surf::getUprightDescriptor()
 {
   int y, x, count=0;
   float scale, *desc, dx, dy, mdx, mdy;
-  float gauss, rx, ry, len = 0.0f;
+  float gauss, rx, ry, len = 0.f;
 
   Ipoint *ipt = &ipts.at(index);
   scale = ipt->scale;
@@ -229,7 +229,7 @@ void Surf::getUprightDescriptor()
         for (int l = j; l < j + 5; ++l) 
         {
           // get Gaussian weighted x and y responses
-          gauss = gaussian(k*scale, l*scale, 3.3f*scale);  
+          gauss = gaussian(k, l, 3.3f*scale);  
           rx = gauss * haarX(k*scale+y, l*scale+x, 2*fRound(scale));
           ry = gauss * haarY(k*scale+y, l*scale+x, 2*fRound(scale));
 
