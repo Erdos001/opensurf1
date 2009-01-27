@@ -21,7 +21,7 @@ typedef std::vector<std::pair<Ipoint, Ipoint>> IpPairVec;
 //  - 2 to capture from a webcam
 //  - 3 to match features between images
 //  - 4 to cluster moving features
-#define PROCEDURE 4
+#define PROCEDURE 3
 
 //-------------------------------------------------------
 
@@ -31,6 +31,7 @@ int mainMatch(void);
 int mainMotionCluster(void);
 void getMatches(IpVec &ipts1, IpVec &ipts2, IpPairVec &matches);
 float compareIpoints(Ipoint &ip1, Ipoint &ip2);
+int locatePlanarObject(IpPairVec &matches, const CvPoint src_corners[4], CvPoint dst_corners[4]);
 
 //-------------------------------------------------------
 
@@ -144,7 +145,10 @@ int mainMatch(void)
   // Declare Ipoints and other stuff
   IpVec ipts, ref_ipts;
   IpPairVec matches;
-  IplImage *img;
+  IplImage *img = cvLoadImage("test1.jpg");
+  surfDetDes(img, ref_ipts, false, 4, 4, 2, 0.0004f);
+  CvPoint src_corners[4] = {{0,0}, {img->width,0}, {img->width, img->height}, {0, img->height}};
+  CvPoint dst_corners[4];
 
   // Main capture loop
   while( 1 ) 
@@ -153,17 +157,21 @@ int mainMatch(void)
     img = cvQueryFrame(capture);
 
     // Detect and describe interest points in the image
-    ref_ipts = ipts;
-    surfDetDes(img, ipts, true, 3, 4, 2, 0.00004f);
+    //ref_ipts = ipts;
+    surfDetDes(img, ipts, false, 4, 4, 2, 0.0004f);
 
     // Fill match vector
     getMatches(ipts,ref_ipts,matches);
     {       
-      for (int i = 0; i < matches.size(); ++i)
+      if (locatePlanarObject(matches, src_corners, dst_corners))
       {
-        drawIpoint(img, matches[i].first); 
-        cvLine(img, cvPoint(matches[i].first.x,matches[i].first.y),
-                    cvPoint(matches[i].second.x,matches[i].second.y), cvScalar(255,255,255),1);
+        for(int i = 0; i < 4; i++ )
+        {
+          CvPoint r1 = dst_corners[i%4];
+          CvPoint r2 = dst_corners[(i+1)%4];
+          cvLine( img, cvPoint(r1.x, r1.y),
+            cvPoint(r2.x, r2.y), cvScalar(255,255,255), 3 );
+        }
       }
     }
 
@@ -222,7 +230,7 @@ int mainMotionCluster(void)
     km.Run(motion, 2, init);
     if (matches.size()) init = false;
     drawPoints(img, km.ipts);
-    
+
     // Display the result
     cvShowImage("OpenSURF", img);
 
@@ -284,4 +292,45 @@ float compareIpoints(Ipoint &ip1, Ipoint &ip2)
     sum += pow(ip2.descriptor[i] - ip1.descriptor[i],2);
 
   return sqrt(sum);
+}
+
+//-------------------------------------------------------
+
+// a rough implementation for object location 
+int locatePlanarObject(IpPairVec &matches, const CvPoint src_corners[4], CvPoint dst_corners[4])
+{
+  double h[9];
+  CvMat _h = cvMat(3, 3, CV_64F, h);
+  std::vector<CvPoint2D32f> pt1, pt2;
+  CvMat _pt1, _pt2;
+  int i, n;
+
+  n = matches.size();
+  if( n < 4 )
+    return 0;
+
+  pt1.resize(n);
+  pt2.resize(n);
+  for( i = 0; i < n; i++ )
+  {
+    pt1[i] = cvPoint2D32f(matches[i].second.x, matches[i].second.y);
+    pt2[i] = cvPoint2D32f(matches[i].first.x, matches[i].first.y);
+  }
+
+  _pt1 = cvMat(1, n, CV_32FC2, &pt1[0] );
+  _pt2 = cvMat(1, n, CV_32FC2, &pt2[0] );
+
+  if( !cvFindHomography( &_pt1, &_pt2, &_h, CV_RANSAC, 5 ))
+    return 0;
+
+  for( i = 0; i < 4; i++ )
+  {
+    double x = src_corners[i].x, y = src_corners[i].y;
+    double Z = 1./(h[6]*x + h[7]*y + h[8]);
+    double X = (h[0]*x + h[1]*y + h[2])*Z;
+    double Y = (h[3]*x + h[4]*y + h[5])*Z;
+    dst_corners[i] = cvPoint(cvRound(X), cvRound(Y));
+  }
+
+  return 1;
 }
