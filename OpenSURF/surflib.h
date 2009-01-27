@@ -19,9 +19,6 @@
 #include "ipoint.h"
 #include "utils.h"
 
-// typedef away STL mess!
-typedef std::vector<Ipoint> IpVec;
-
 
 //! Library function builds vector of described interest points
 inline void surfDetDes(IplImage *img,  /* image to find Ipoints in */

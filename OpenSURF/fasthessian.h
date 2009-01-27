@@ -12,8 +12,8 @@
 #define FASTHESSIAN_H
 
 #include "cv.h"
-#include "integral.h"
 #include "ipoint.h"
+
 #include <vector>
 
 static const int OCTAVES = 3;

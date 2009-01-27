@@ -8,11 +8,11 @@
 *                                                          *
 ************************************************************/
 
-#include "cv.h"
-#include "highgui.h"
-#include "integral.h"
 #include "utils.h"
 
+#include "integral.h"
+
+using namespace std;
 
 //! Computes the integral image of image img.  Assumes source image to be a 
 //! 32-bit floating point.  Returns IplImage of 32-bit float form.
@@ -65,10 +65,10 @@ float BoxIntegral(IplImage *img, int row, int col, int rows, int cols)
   int step = img->widthStep/sizeof(float);
 
   // The subtraction by one for row/col is because row/col is inclusive.
-  int r1 = min(row,          img->height) - 1;
-  int c1 = min(col,          img->width)  - 1;
-  int r2 = min(row + rows,   img->height) - 1;
-  int c2 = min(col + cols,   img->width)  - 1;
+  int r1 = std::min(row,          img->height) - 1;
+  int c1 = std::min(col,          img->width)  - 1;
+  int r2 = std::min(row + rows,   img->height) - 1;
+  int c2 = std::min(col + cols,   img->width)  - 1;
 
   float A(0.0f), B(0.0f), C(0.0f), D(0.0f);
   if (r1 >= 0 && c1 >= 0) A = data[r1 * step + c1];
@@ -76,5 +76,5 @@ float BoxIntegral(IplImage *img, int row, int col, int rows, int cols)
   if (r2 >= 0 && c1 >= 0) C = data[r2 * step + c1];
   if (r2 >= 0 && c2 >= 0) D = data[r2 * step + c2];
 
-  return max(0, A - B - C + D);
+  return std::max(0.f, A - B - C + D);
 }

@@ -10,11 +10,13 @@
 
 #include "cv.h"
 #include "integral.h"
-#include "fasthessian.h"
 #include "ipoint.h"
 #include "utils.h"
+
 #include <vector>
-#include <iostream>
+
+#include "fasthessian.h"
+
 using namespace std;
 
 //-------------------------------------------------------
@@ -260,7 +262,7 @@ void FastHessian::interpolateExtremum(int octv, int intvl, int r, int c)
 {
   double xi = 0, xr = 0, xc = 0;
   int i = 0;
-  float step = init_sample * fRound(pow(2.0f,octv));
+  int step = init_sample * fRound(pow(2.0f,octv));
 
   // Get the offsets to the actual location of the extremum
   interpolateStep( octv, intvl, r, c, &xi, &xr, &xc );
