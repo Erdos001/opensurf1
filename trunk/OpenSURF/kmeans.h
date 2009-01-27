@@ -8,10 +8,11 @@
 *                                                          *
 ************************************************************/
 
+#include "ipoint.h"
+
 #include <vector>
 #include <time.h>
 #include <stdlib.h>
-#include "surflib.h"
 
 //-----------------------------------------------------------
 // Kmeans clustering class (under development)
@@ -88,7 +89,7 @@ void Kmeans::InitRandomClusters(int n)
   clusters.clear();
 
   // Seed the random number generator
-  srand(time(NULL));
+  srand((int)time(NULL));
 
   // add 'n' random ipoints to clusters list as initial centers
   for (int i = 0; i < n; ++i)
@@ -130,7 +131,7 @@ bool Kmeans::AssignToClusters()
 
 void Kmeans::RepositionClusters()
 {
-  int x, y, dx, dy, count;
+  float x, y, dx, dy, count;
 
   for (unsigned int i = 0; i < clusters.size(); ++i)
   {

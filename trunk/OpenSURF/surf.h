@@ -14,9 +14,8 @@
 #include "cv.h"
 #include "ipoint.h"
 #include "integral.h"
-#include <vector>
 
-typedef std::vector<Ipoint> IpVec;
+#include <vector>
 
 class Surf {
   

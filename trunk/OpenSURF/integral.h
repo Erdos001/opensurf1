@@ -11,6 +11,7 @@
 #ifndef INTEGRAL_H
 #define INTEGRAL_H
 
+#include "cv.h"
 
 //! Computes the integral image of image img.  Assumes source image to be a 
 //! 32-bit floating point.  Returns IplImage in 32-bit float form.

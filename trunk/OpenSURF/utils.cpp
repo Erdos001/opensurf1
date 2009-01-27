@@ -10,11 +10,16 @@
 
 #include "cv.h"
 #include "highgui.h"
-#include "utils.h"
+
 #include <iostream>
 #include <fstream>
 #include <time.h>
+
+#include "utils.h"
+
 using namespace std;
+
+//-------------------------------------------------------
 
 static const int NCOLOURS = 8;
 static const CvScalar COLOURS [] = {cvScalar(255,0,0), cvScalar(0,255,0), 
@@ -197,7 +202,7 @@ void drawWindows(IplImage *img, vector<Ipoint> &ipts)
   int x, y;
   CvPoint2D32f src[4];
 
-  for(int i = 0; i < fRound(ipts.size()); i++) 
+  for(unsigned int i = 0; i < ipts.size(); i++) 
   {
     ipt = &ipts.at(i);
     s = (10 * ipt->scale);
@@ -213,7 +218,7 @@ void drawWindows(IplImage *img, vector<Ipoint> &ipts)
     src[3].x=sd*-s+cd*s+x;  src[3].y=-cd*-s+sd*s+y;
 
     if (o) // Draw orientation line
-      cvLine(img, cvPoint(fRound(x), fRound(y)), 
+      cvLine(img, cvPoint(x, y), 
       cvPoint(fRound(s*cd + x), fRound(s*sd + y)), cvScalar(0, 255, 0),1);
     else  // Green dot if using upright version
       cvCircle(img, cvPoint(x,y), 1, cvScalar(0, 255, 0),-1);

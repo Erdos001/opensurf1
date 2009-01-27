@@ -8,16 +8,15 @@
 *                                                          *
 ************************************************************/
 
-#include "cv.h"
-#include "highgui.h"
-#include "integral.h"
-#include "surf.h"
 #include "utils.h"
-#include <fstream>
-#include <iostream>
-using namespace std;
+
+#include "surf.h"
+
+//-------------------------------------------------------
 
 const float pi = float(CV_PI);
+
+//-------------------------------------------------------
 
 //! Destructor
 Surf::~Surf()
@@ -42,12 +41,12 @@ void Surf::getDescriptors(bool upright)
   if (!ipts.size()) return;
 
   // Get the size of the vector for fixed loop bounds
-  int ipts_size = ipts.size();
+  int ipts_size = (int)ipts.size();
 
   if (upright)
   {
     // U-SURF loop just gets descriptors
-    for (unsigned int i = 0; i < ipts_size; ++i)
+    for (int i = 0; i < ipts_size; ++i)
     {
       // Set the Ipoint to be described
       index = i;
@@ -59,7 +58,7 @@ void Surf::getDescriptors(bool upright)
   else
   {
     // Main SURF-64 loop assigns orientations and gets descriptors
-    for (unsigned int i = 0; i < ipts_size; ++i)
+    for (int i = 0; i < ipts_size; ++i)
     {
       // Set the Ipoint to be described
       index = i;
@@ -102,7 +101,7 @@ void Surf::getOrientation()
   float ang1, ang2, ang;
 
   // loop slides pi/3 window around feature point
-  for(ang1 = 0; ang1 < 2*pi;  ang1+=0.1f) {
+  for(ang1 = 0; ang1 < 2*pi;  ang1+=0.2f) {
     ang2 = ( ang1+pi/3.0f > 2*pi ? ang1-5.0f*pi/3.0f : ang1+pi/3.0f);
     sumX = sumY = 0; 
     for(unsigned int k = 0; k < Ang.size(); k++) 
@@ -143,9 +142,9 @@ void Surf::getOrientation()
 //! Get the descriptor vector of the provided Ipoint
 void Surf::getDescriptor()
 {
-  int y, x, count=0;
+  int y, x, sample_x, sample_y, count=0;
   float scale, *desc, dx, dy, mdx, mdy, co, si;
-  float gauss, rx, ry, rrx, rry, sample_x, sample_y, len=0;
+  float gauss, rx, ry, rrx, rry, len=0;
   
   Ipoint *ipt = &ipts.at(index);
   scale = ipt->scale;
@@ -230,8 +229,8 @@ void Surf::getUprightDescriptor()
         {
           // get Gaussian weighted x and y responses
           gauss = gaussian(k, l, 3.3f*scale);  
-          rx = gauss * haarX(k*scale+y, l*scale+x, 2*fRound(scale));
-          ry = gauss * haarY(k*scale+y, l*scale+x, 2*fRound(scale));
+          rx = gauss * haarX(fRound(k*scale+y), fRound(l*scale+x), 2*fRound(scale));
+          ry = gauss * haarY(fRound(k*scale+y), fRound(l*scale+x), 2*fRound(scale));
 
           dx += rx;
           dy += ry;

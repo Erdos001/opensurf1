@@ -185,6 +185,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ipoint.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\main.cpp"
 				>
 			</File>
@@ -232,4 +236,6 @@
 			</File>
 		</Filter>
 	</Files>
+	<Globals>
+	</Globals>
 </VisualStudioProject>
