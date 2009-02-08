@@ -23,11 +23,11 @@
 //  - 3 to match find an object in an image (work in progress)
 //  - 4 to display moving features (work in progress)
 //  - 5 to show matches between static images
-#define PROCEDURE 5
+#define PROCEDURE 2
 
 //-------------------------------------------------------
 
-int mainImage(const char *filename);
+int mainImage(void);
 int mainVideo(void);
 int mainMatch(void);
 int mainMotionPoints(void);
@@ -35,9 +35,9 @@ int mainStaticMatch(void);
 
 //-------------------------------------------------------
 
-int main() 
+int main(void) 
 {
-  if (PROCEDURE == 1) return mainImage("building.pgm");
+  if (PROCEDURE == 1) return mainImage();
   if (PROCEDURE == 2) return mainVideo();
   if (PROCEDURE == 3) return mainMatch();
   if (PROCEDURE == 4) return mainMotionPoints();
@@ -48,7 +48,7 @@ int main()
 //-------------------------------------------------------
 
 
-int mainImage(const char *filename)
+int mainImage(void)
 {
   // Declare Ipoints and other stuff
   IpVec ipts;
@@ -90,7 +90,7 @@ int mainVideo(void)
     img = cvQueryFrame(capture);
 
     // Extract surf points
-    surfDetDes(img, ipts, false, 4, 4, 2, 0.0004f);    
+    surfDetDes(img, ipts, true, 3, 4, 2, 0.0004f);    
 
     // Draw the detected points
     drawIpoints(img, ipts);
@@ -128,12 +128,12 @@ int mainMatch(void)
   IpVec ipts, ref_ipts;
   
   // This is the reference object we wish to find in video frame
-  IplImage *img = cvLoadImage("Images/test1.jpg");
+  IplImage *img = cvLoadImage("Images/test.jpg");
   CvPoint src_corners[4] = {{0,0}, {img->width,0}, {img->width, img->height}, {0, img->height}};
   CvPoint dst_corners[4];
 
   // Extract reference object Ipoints
-  surfDetDes(img, ref_ipts, false, 4, 4, 2, 0.00002f);
+  surfDetDes(img, ref_ipts, false, 4, 4, 2, 0.0002f);
   drawIpoints(img, ref_ipts);
   showImage(img);
 
@@ -144,7 +144,7 @@ int mainMatch(void)
     img = cvQueryFrame(capture);
      
     // Detect and describe interest points in the frame
-    surfDetDes(img, ipts, false, 4, 4, 2, 0.0004f);
+    surfDetDes(img, ipts, false, 4, 4, 2, 0.0002f);
 
     // Fill match vector
     getMatches(ipts,ref_ipts,matches);
@@ -195,7 +195,7 @@ int mainMotionPoints(void)
   cvNamedWindow("OpenSURF", CV_WINDOW_AUTOSIZE );
 
   // Declare Ipoints and other stuff
-  IpVec ipts, ref_ipts, motion;
+  IpVec ipts, old_ipts, motion;
   IpPairVec matches;
   IplImage *img;
 
@@ -206,18 +206,18 @@ int mainMotionPoints(void)
     img = cvQueryFrame(capture);
 
     // Detect and describe interest points in the image
-    ref_ipts = ipts;
-    surfDetDes(img, ipts, true, 4, 4, 1, 0.0001f);
+    old_ipts = ipts;
+    surfDetDes(img, ipts, true, 3, 4, 2, 0.0004f);
 
     // Fill match vector
-    motion.clear();
-    getMatches(ipts,ref_ipts,matches);
+    getMatches(ipts,old_ipts,matches);
     for (unsigned int i = 0; i < matches.size(); ++i) 
     {
-      float dx = matches[i].first.x - matches[i].second.x;
-      float dy = matches[i].first.y - matches[i].second.y;
-      if (sqrt(dx*dx+dy*dy) > 5) 
-        drawIpoint(img, matches[i].first);
+      float dx = matches[i].first.dx;
+      float dy = matches[i].first.dy;
+      float speed = sqrt(dx*dx+dy*dy);
+      if (speed > 5 && speed < 30) 
+        drawIpoint(img, matches[i].first, 3);
     }
         
     // Display the result
@@ -239,8 +239,8 @@ int mainMotionPoints(void)
 int mainStaticMatch()
 {
   IplImage *img1, *img2;
-  img1 = cvLoadImage("Images/img1.pgm");
-  img2 = cvLoadImage("Images/img3.pgm");
+  img1 = cvLoadImage("Images/img1.jpg");
+  img2 = cvLoadImage("Images/img2.jpg");
 
   IpVec ipts1, ipts2;
   surfDetDes(img1,ipts1,false,4,4,2,0.0004f);
@@ -251,8 +251,8 @@ int mainStaticMatch()
 
   for (unsigned int i = 0; i < matches.size(); ++i)
   {
-    drawIpoint(img1,matches[i].first);
-    drawIpoint(img2,matches[i].second);
+    drawPoint(img1,matches[i].first);
+    drawPoint(img2,matches[i].second);
   
     int w = img1->width;
     cvLine(img1,cvPoint(matches[i].first.x,matches[i].first.y),cvPoint(matches[i].second.x+w,matches[i].second.y), cvScalar(255,255,255),1);

@@ -30,7 +30,7 @@ void showImage(char *title, IplImage *img);
 IplImage* getGray(IplImage *img);
 
 //! Draw a single feature on the image
-void drawIpoint(IplImage *img, Ipoint &ipt);
+void drawIpoint(IplImage *img, Ipoint &ipt, int tailSize = 0);
 
 //! Draw all the Ipoints in the provided vector
 void drawIpoints(IplImage *img, std::vector<Ipoint> &ipts, int tailSize = 0);

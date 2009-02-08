@@ -14,9 +14,19 @@
 #include <vector>
 #include <math.h>
 
-class Ipoint; // pre declaration
+//-------------------------------------------------------
+
+class Ipoint; // Pre-declaration
 typedef std::vector<Ipoint> IpVec;
 typedef std::vector<std::pair<Ipoint, Ipoint>> IpPairVec;
+
+//-------------------------------------------------------
+
+//! Ipoint operations
+void getMatches(IpVec &ipts1, IpVec &ipts2, IpPairVec &matches);
+int translateCorners(IpPairVec &matches, const CvPoint src_corners[4], CvPoint dst_corners[4]);
+
+//-------------------------------------------------------
 
 class Ipoint {
 
@@ -59,10 +69,7 @@ public:
   int clusterIndex;
 };
 
-
 //-------------------------------------------------------
-//! Ipoint operations
-void getMatches(IpVec &ipts1, IpVec &ipts2, IpPairVec &matches);
-int translateCorners(IpPairVec &matches, const CvPoint src_corners[4], CvPoint dst_corners[4]);
+
 
 #endif

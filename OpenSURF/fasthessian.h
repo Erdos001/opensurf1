@@ -62,7 +62,7 @@ class FastHessian {
 
     //! Calculate determinant of hessian responses
     void buildDet();
-   
+
     //! Non Maximal Suppression function
     int isExtremum(int octave, int interval, int column, int row);    
     
@@ -101,8 +101,8 @@ class FastHessian {
 
     //! Array stack of determinant of hessian values
     float *m_det;
-};
 
+};
 
 
 #endif

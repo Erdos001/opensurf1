@@ -9,12 +9,37 @@
 ************************************************************/
 
 #include "utils.h"
+#include <iostream>
 
 #include "surf.h"
 
 //-------------------------------------------------------
-
+//! Prior calculations (these need not be done at runtime)
 const float pi = 3.14159f;
+
+const double gauss25 [7][7] = {
+0.02350693969273,0.01849121369071,0.01239503121241,0.00708015417522,0.00344628101733,0.00142945847484,0.00050524879060,
+0.02169964028389,0.01706954162243,0.01144205592615,0.00653580605408,0.00318131834134,0.00131955648461,0.00046640341759,
+0.01706954162243,0.01342737701584,0.00900063997939,0.00514124713667,0.00250251364222,0.00103799989504,0.00036688592278,
+0.01144205592615,0.00900063997939,0.00603330940534,0.00344628101733,0.00167748505986,0.00069579213743,0.00024593098864,
+0.00653580605408,0.00514124713667,0.00344628101733,0.00196854695367,0.00095819467066,0.00039744277546,0.00014047800980,
+0.00318131834134,0.00250251364222,0.00167748505986,0.00095819467066,0.00046640341759,0.00019345616757,0.00006837798818,
+0.00131955648461,0.00103799989504,0.00069579213743,0.00039744277546,0.00019345616757,0.00008024231247,0.00002836202103
+};
+
+const double gauss33 [11][11] = {
+0.014614763,0.013958917,0.012162744,0.00966788,0.00701053,0.004637568,0.002798657,0.001540738,0.000773799,0.000354525,0.000148179,
+0.013958917,0.013332502,0.011616933,0.009234028,0.006695928,0.004429455,0.002673066,0.001471597,0.000739074,0.000338616,0.000141529,
+0.012162744,0.011616933,0.010122116,0.008045833,0.005834325,0.003859491,0.002329107,0.001282238,0.000643973,0.000295044,0.000123318,
+0.00966788,0.009234028,0.008045833,0.006395444,0.004637568,0.003067819,0.001851353,0.001019221,0.000511879,0.000234524,9.80224E-05,
+0.00701053,0.006695928,0.005834325,0.004637568,0.003362869,0.002224587,0.001342483,0.000739074,0.000371182,0.000170062,7.10796E-05,
+0.004637568,0.004429455,0.003859491,0.003067819,0.002224587,0.001471597,0.000888072,0.000488908,0.000245542,0.000112498,4.70202E-05,
+0.002798657,0.002673066,0.002329107,0.001851353,0.001342483,0.000888072,0.000535929,0.000295044,0.000148179,6.78899E-05,2.83755E-05,
+0.001540738,0.001471597,0.001282238,0.001019221,0.000739074,0.000488908,0.000295044,0.00016243,8.15765E-05,3.73753E-05,1.56215E-05,
+0.000773799,0.000739074,0.000643973,0.000511879,0.000371182,0.000245542,0.000148179,8.15765E-05,4.09698E-05,1.87708E-05,7.84553E-06,
+0.000354525,0.000338616,0.000295044,0.000234524,0.000170062,0.000112498,6.78899E-05,3.73753E-05,1.87708E-05,8.60008E-06,3.59452E-06,
+0.000148179,0.000141529,0.000123318,9.80224E-05,7.10796E-05,4.70202E-05,2.83755E-05,1.56215E-05,7.84553E-06,3.59452E-06,1.50238E-06
+};
 
 //-------------------------------------------------------
 
@@ -81,15 +106,15 @@ void Surf::getOrientation()
   std::vector<float> resX, resY, Ang;
 
   // calculate haar responses for points within radius of 6*scale
-  for(int i = -6*s; i <= 6*s; i+=s) 
+  for(int i = -6; i <= 6; ++i) 
   {
-    for(int j = -6*s; j <= 6*s; j+=s) 
+    for(int j = -6; j <= 6; ++j) 
     {
-      if( i*i + j*j  < 36*s*s ) 
+      if(i*i + j*j < 36) 
       {
-        gauss = gaussian(i, j, 2.5f);
-        resX.push_back( gauss * haarX(r+j, c+i, 4*s) );
-        resY.push_back( gauss * haarY(r+j, c+i, 4*s) );
+        gauss = static_cast<float>(gauss25[abs(i)][abs(j)]);
+        resX.push_back( gauss * haarX(r+j*s, c+i*s, 4*s) );
+        resY.push_back( gauss * haarY(r+j*s, c+i*s, 4*s) );
         Ang.push_back(getAngle(resX.back(), resY.back()));
       }
     }
@@ -101,7 +126,7 @@ void Surf::getOrientation()
   float ang1, ang2, ang;
 
   // loop slides pi/3 window around feature point
-  for(ang1 = 0; ang1 < 2*pi;  ang1+=0.2f) {
+  for(ang1 = 0; ang1 < 2*pi;  ang1+=0.1f) {
     ang2 = ( ang1+pi/3.0f > 2*pi ? ang1-5.0f*pi/3.0f : ang1+pi/3.0f);
     sumX = sumY = 0; 
     for(unsigned int k = 0; k < Ang.size(); k++) 
@@ -169,7 +194,7 @@ void Surf::getDescriptor()
           sample_y = fRound(y + ( l*scale*co + k*scale*si));
 
           // Get the gaussian weighted x and y responses
-          gauss = gaussian(k, l, 3.3f);  
+          gauss = static_cast<float>(gauss33[abs(k)][abs(l)]);
           rx = gauss * haarX(sample_y, sample_x, 2*fRound(scale));
           ry = gauss * haarY(sample_y, sample_x, 2*fRound(scale));
 
@@ -228,7 +253,8 @@ void Surf::getUprightDescriptor()
         for (int l = j; l < j + 5; ++l) 
         {
           // get Gaussian weighted x and y responses
-          gauss = gaussian(k, l, 3.3f);  
+          gauss = static_cast<float>(gauss33[abs(k)][abs(l)]);
+          //gauss = gaussian(k, l, 3.3f);  
           rx = gauss * haarX(fRound(k*scale+y), fRound(l*scale+x), 2*fRound(scale));
           ry = gauss * haarY(fRound(k*scale+y), fRound(l*scale+x), 2*fRound(scale));
 
@@ -262,7 +288,7 @@ void Surf::getUprightDescriptor()
 //! Calculate the value of the 2d gaussian at x,y
 inline float Surf::gaussian(int x, int y, float sig)
 {
-  return 1.0f/(2.0f*pi*sig*sig) * exp( -(x*x+y*y)/(2.0f*sig*sig));
+  return (1.0f/(2.0f*pi*sig*sig)) * exp( -(x*x+y*y)/(2.0f*sig*sig));
 }
 
 //-------------------------------------------------------
@@ -279,7 +305,7 @@ inline float Surf::gaussian(float x, float y, float sig)
 inline float Surf::haarX(int row, int column, int s)
 {
   return BoxIntegral(img, row-s/2, column, s, s/2) 
-    -1 * BoxIntegral(img,  row-s/2, column-s/2, s, s/2);
+    -1 * BoxIntegral(img, row-s/2, column-s/2, s, s/2);
 }
 
 //-------------------------------------------------------
