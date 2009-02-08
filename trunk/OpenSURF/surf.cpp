@@ -14,7 +14,7 @@
 
 //-------------------------------------------------------
 
-const float pi = float(CV_PI);
+const float pi = 3.14159f;
 
 //-------------------------------------------------------
 
@@ -87,7 +87,7 @@ void Surf::getOrientation()
     {
       if( i*i + j*j  < 36*s*s ) 
       {
-        gauss = gaussian(i, j, 2.5f*s);
+        gauss = gaussian(i, j, 2.5f);
         resX.push_back( gauss * haarX(r+j, c+i, 4*s) );
         resY.push_back( gauss * haarY(r+j, c+i, 4*s) );
         Ang.push_back(getAngle(resX.back(), resY.back()));
@@ -169,7 +169,7 @@ void Surf::getDescriptor()
           sample_y = fRound(y + ( l*scale*co + k*scale*si));
 
           // Get the gaussian weighted x and y responses
-          gauss = gaussian(k, l, 3.3f*scale);  
+          gauss = gaussian(k, l, 3.3f);  
           rx = gauss * haarX(sample_y, sample_x, 2*fRound(scale));
           ry = gauss * haarY(sample_y, sample_x, 2*fRound(scale));
 
@@ -228,7 +228,7 @@ void Surf::getUprightDescriptor()
         for (int l = j; l < j + 5; ++l) 
         {
           // get Gaussian weighted x and y responses
-          gauss = gaussian(k, l, 3.3f*scale);  
+          gauss = gaussian(k, l, 3.3f);  
           rx = gauss * haarX(fRound(k*scale+y), fRound(l*scale+x), 2*fRound(scale));
           ry = gauss * haarY(fRound(k*scale+y), fRound(l*scale+x), 2*fRound(scale));
 

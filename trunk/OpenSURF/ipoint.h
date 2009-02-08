@@ -28,6 +28,7 @@ public:
   //! Constructor
   Ipoint() : orientation(0) {};
 
+  //! Gets the distance in descriptor space between Ipoints
   float operator-(const Ipoint &rhs)
   {
     float sum=0.f;
