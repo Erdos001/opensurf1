@@ -32,9 +32,12 @@ void getMatches(IpVec &ipts1, IpVec &ipts2, IpPairVec &matches)
       }
     }
 
-    // If match has a d1:d2 ratio < 0.7 ipoints are a match
-    if(d1/d2 < 0.7) 
+    // If match has a d1:d2 ratio < 0.65 ipoints are a match
+    if(d1/d2 < 0.65) 
     { 
+      // Store the change in position
+      ipts1[i].dx = match->x - ipts1[i].x; 
+      ipts1[i].dy = match->y - ipts1[i].y;
       matches.push_back(std::make_pair(ipts1[i], *match));
     }
   }

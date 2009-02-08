@@ -125,7 +125,7 @@ void drawIpoints(IplImage *img, vector<Ipoint> &ipts, int tailSize)
 //-------------------------------------------------------
 
 //! Draw a single feature on the image
-void drawIpoint(IplImage *img, Ipoint &ipt)
+void drawIpoint(IplImage *img, Ipoint &ipt, int tailSize)
 {
   float s, o;
   int r1, c1, r2, c2, lap;
@@ -135,12 +135,14 @@ void drawIpoint(IplImage *img, Ipoint &ipt)
   lap = ipt.laplacian;
   r1 = fRound(ipt.y);
   c1 = fRound(ipt.x);
-  c2 = fRound(s * cos(o)) + c1;
-  r2 = fRound(s * sin(o)) + r1;
 
   // Green line indicates orientation
   if (o) // Green line indicates orientation
+  {
+    c2 = fRound(s * cos(o)) + c1;
+    r2 = fRound(s * sin(o)) + r1;
     cvLine(img, cvPoint(c1, r1), cvPoint(c2, r2), cvScalar(0, 255, 0));
+  }
   else  // Green dot if using upright version
     cvCircle(img, cvPoint(c1,r1), 1, cvScalar(0, 255, 0),-1);
 
@@ -151,6 +153,14 @@ void drawIpoint(IplImage *img, Ipoint &ipt)
   else
   { // Red circles indicate light blobs on dark backgrounds
     cvCircle(img, cvPoint(c1,r1), fRound(s), cvScalar(0, 0, 255),1);
+  }
+
+  // Draw motion from ipoint dx and dy
+  if (tailSize)
+  {
+    cvLine(img, cvPoint(c1,r1),
+      cvPoint(int(c1+ipt.dx*tailSize), int(r1+ipt.dy*tailSize)),
+      cvScalar(255,255,255), 1);
   }
 }
 
