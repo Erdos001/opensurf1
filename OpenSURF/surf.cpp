@@ -254,7 +254,6 @@ void Surf::getUprightDescriptor()
         {
           // get Gaussian weighted x and y responses
           gauss = static_cast<float>(gauss33[abs(k)][abs(l)]);
-          //gauss = gaussian(k, l, 3.3f);  
           rx = gauss * haarX(fRound(k*scale+y), fRound(l*scale+x), 2*fRound(scale));
           ry = gauss * haarY(fRound(k*scale+y), fRound(l*scale+x), 2*fRound(scale));
 
