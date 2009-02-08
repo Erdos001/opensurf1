@@ -23,7 +23,7 @@
 //  - 3 to match find an object in an image (work in progress)
 //  - 4 to display moving features (work in progress)
 //  - 5 to show matches between static images
-#define PROCEDURE 2
+#define PROCEDURE 5
 
 //-------------------------------------------------------
 
@@ -243,8 +243,8 @@ int mainStaticMatch()
   img2 = cvLoadImage("Images/img2.jpg");
 
   IpVec ipts1, ipts2;
-  surfDetDes(img1,ipts1,false,4,4,2,0.0004f);
-  surfDetDes(img2,ipts2,false,4,4,2,0.0004f);
+  surfDetDes(img1,ipts1,false,4,4,2,0.0006f);
+  surfDetDes(img2,ipts2,false,4,4,2,0.0006f);
 
   IpPairVec matches;
   getMatches(ipts1,ipts2,matches);
