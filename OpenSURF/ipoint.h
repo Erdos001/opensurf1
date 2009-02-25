@@ -43,7 +43,7 @@ public:
   {
     float sum=0.f;
     for(int i=0; i < 64; i++)
-      sum += pow(this->descriptor[i] - rhs.descriptor[i],2);
+      sum += (this->descriptor[i] - rhs.descriptor[i])*(this->descriptor[i] - rhs.descriptor[i]);
     return sqrt(sum);
   };
 
