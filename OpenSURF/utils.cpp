@@ -339,10 +339,4 @@ void loadSurf(char *filename, vector<Ipoint> &ipts)
 
 //-------------------------------------------------------
 
-//! Round float to nearest integer
-inline int fRound(float flt)
-{
-  return (int) floor(flt+0.5f);
-}
-
 //-------------------------------------------------------

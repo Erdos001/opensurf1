@@ -18,7 +18,7 @@
 
 class Ipoint; // Pre-declaration
 typedef std::vector<Ipoint> IpVec;
-typedef std::vector<std::pair<Ipoint, Ipoint>> IpPairVec;
+typedef std::vector<std::pair<Ipoint, Ipoint> > IpPairVec;
 
 //-------------------------------------------------------
 
