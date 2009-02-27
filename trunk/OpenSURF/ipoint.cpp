@@ -43,11 +43,17 @@ void getMatches(IpVec &ipts1, IpVec &ipts2, IpPairVec &matches)
   }
 }
 
+//
+// This function uses homography with CV_RANSAC (OpenCV 1.1)
+// Won't compile on most linux distributions
+//
+
 //-------------------------------------------------------
 
 //! Find homography between matched points and translate src_corners to dst_corners
 int translateCorners(IpPairVec &matches, const CvPoint src_corners[4], CvPoint dst_corners[4])
 {
+#ifndef LINUX
   double h[9];
   CvMat _h = cvMat(3, 3, CV_64F, h);
   std::vector<CvPoint2D32f> pt1, pt2;
@@ -82,7 +88,7 @@ int translateCorners(IpPairVec &matches, const CvPoint src_corners[4], CvPoint d
     double Y = (h[3]*x + h[4]*y + h[5])*Z;
     dst_corners[i] = cvPoint(cvRound(X), cvRound(Y));
   }
-
+#endif
   return 1;
 }
 

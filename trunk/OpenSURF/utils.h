@@ -54,6 +54,9 @@ void saveSurf(char *filename, std::vector<Ipoint> &ipts);
 void loadSurf(char *filename, std::vector<Ipoint> &ipts);
 
 //! Round float to nearest integer
-inline int fRound(float flt);
+inline int fRound(float flt)
+{
+  return (int) floor(flt+0.5f);
+}
 
 #endif
