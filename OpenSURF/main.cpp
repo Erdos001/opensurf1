@@ -23,7 +23,7 @@
 //  - 3 to match find an object in an image (work in progress)
 //  - 4 to display moving features (work in progress)
 //  - 5 to show matches between static images
-#define PROCEDURE 5
+#define PROCEDURE 1
 
 //-------------------------------------------------------
 
@@ -32,6 +32,7 @@ int mainVideo(void);
 int mainMatch(void);
 int mainMotionPoints(void);
 int mainStaticMatch(void);
+int mainKmeans(void);
 
 //-------------------------------------------------------
 
@@ -42,6 +43,7 @@ int main(void)
   if (PROCEDURE == 3) return mainMatch();
   if (PROCEDURE == 4) return mainMotionPoints();
   if (PROCEDURE == 5) return mainStaticMatch();
+  if (PROCEDURE == 6) return mainKmeans();
 }
 
 
@@ -52,10 +54,10 @@ int mainImage(void)
 {
   // Declare Ipoints and other stuff
   IpVec ipts;
-  IplImage *img=cvLoadImage("Images/img1.jpg");
+  IplImage *img=cvLoadImage("Images/test.bmp");
 
   // Detect and describe interest points in the image
-  surfDetDes(img, ipts, false, 3, 4, 2, 0.0008f);
+  surfDetDes(img, ipts, true, 3, 4, 2, 0.001f);
 
   // Draw the detected points
   drawIpoints(img, ipts);
@@ -271,3 +273,30 @@ int mainStaticMatch()
 }
 
 //-------------------------------------------------------
+
+int mainKmeans(void)
+{
+  IplImage *img = cvLoadImage("Images/test.bmp");
+  IpVec ipts;
+  Kmeans km;
+  
+  // Get Ipoints
+  surfDetDes(img,ipts,true,3,4,2,0.0006f);
+
+  for (int repeat = 0; repeat < 10; ++repeat)
+  {
+
+    IplImage *img = cvLoadImage("Images/test.bmp");
+    km.Run(&ipts, 5, true);
+    drawPoints(img, km.clusters);
+
+    for (int i = 0; i < ipts.size(); ++i)
+    {
+      cvLine(img, cvPoint(ipts[i].x,ipts[i].y), cvPoint(km.clusters[ipts[i].clusterIndex].x ,km.clusters[ipts[i].clusterIndex].y),cvScalar(255,255,255));
+    }
+
+    showImage(img);
+  }
+
+  return 0;
+}
