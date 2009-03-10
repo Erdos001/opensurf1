@@ -198,7 +198,7 @@ void FastHessian::buildDet()
           int lap_sign = (Dxx+Dyy >= 0 ? 1 : -1);
 
           // Get the determinant of hessian response
-          float determinant = (Dxx*Dyy - pow(0.91f*Dxy,2));
+          float determinant = (Dxx*Dyy - 0.81f*Dxy*Dxy);
 
           m_det[(o*intervals+i)*(i_width*i_height) + (r*i_width+c)] 
           = (determinant < 0 ? 0 : lap_sign * determinant);

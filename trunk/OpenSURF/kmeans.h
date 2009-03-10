@@ -33,10 +33,10 @@ public:
   Kmeans() {};
 
   //! Do it all!
-  void Run(IpVec &ipts, int clusters, bool init = false);
+  void Run(IpVec *ipts, int clusters, bool init = false);
 
   //! Set the ipts to be used
-  void SetIpoints(IpVec ipts);
+  void SetIpoints(IpVec *ipts);
 
   //! Randomly distribute 'n' clusters
   void InitRandomClusters(int n);
@@ -51,7 +51,7 @@ public:
   float Distance(Ipoint &ip1, Ipoint &ip2);
 
   //! Vector stores ipoints for this run
-  IpVec ipts;
+  IpVec *ipts;
 
   //! Vector stores cluster centers
   IpVec clusters;
@@ -60,9 +60,9 @@ public:
 
 //-------------------------------------------------------
 
-void Kmeans::Run(IpVec &ipts, int clusters, bool init)
+void Kmeans::Run(IpVec *ipts, int clusters, bool init)
 {
-  if (!ipts.size()) return;
+  if (!ipts->size()) return;
 
   SetIpoints(ipts);
 
@@ -76,7 +76,7 @@ void Kmeans::Run(IpVec &ipts, int clusters, bool init)
 
 //-------------------------------------------------------
 
-void Kmeans::SetIpoints(IpVec ipts)
+void Kmeans::SetIpoints(IpVec *ipts)
 {
   this->ipts = ipts;
 }
@@ -94,7 +94,7 @@ void Kmeans::InitRandomClusters(int n)
   // add 'n' random ipoints to clusters list as initial centers
   for (int i = 0; i < n; ++i)
   {
-    clusters.push_back(ipts.at(rand() % ipts.size()));
+    clusters.push_back(ipts->at(rand() % ipts->size()));
   }
 }
 
@@ -105,23 +105,23 @@ bool Kmeans::AssignToClusters()
   bool Updated = false;
 
   // loop over all Ipoints and assign each to closest cluster
-  for (unsigned int i = 0; i < ipts.size(); ++i)
+  for (unsigned int i = 0; i < ipts->size(); ++i)
   {
     float bestDist = FLT_MAX;
-    int oldIndex = ipts[i].clusterIndex;
+    int oldIndex = ipts->at(i).clusterIndex;
 
     for (unsigned int j = 0; j < clusters.size(); ++j)
     {
-      float currentDist = Distance(ipts[i], clusters[j]);
+      float currentDist = Distance(ipts->at(i), clusters[j]);
       if (currentDist < bestDist)
       {
         bestDist = currentDist;
-        ipts[i].clusterIndex = j;
+        ipts->at(i).clusterIndex = j;
       }
     }
 
     // determine whether point has changed cluster
-    if (ipts[i].clusterIndex != oldIndex) Updated = true;
+    if (ipts->at(i).clusterIndex != oldIndex) Updated = true;
   }
 
   return Updated;
@@ -138,14 +138,15 @@ void Kmeans::RepositionClusters()
     x = y = dx = dy = 0;
     count = 1;
 
-    for (unsigned int j = 0; j < ipts.size(); ++j)
+    for (unsigned int j = 0; j < ipts->size(); ++j)
     {
-      if (ipts[j].clusterIndex == i)
+      if (ipts->at(j).clusterIndex == i)
       {
-        x += ipts[j].x;
-        y += ipts[j].y;
-        dx += ipts[j].dx;
-        dy += ipts[j].dy;
+        Ipoint ip = ipts->at(j);
+        x += ip.x;
+        y += ip.y;
+        dx += ip.dx;
+        dy += ip.dy;
         ++count;
       }
     }
@@ -161,10 +162,10 @@ void Kmeans::RepositionClusters()
 
 float Kmeans::Distance(Ipoint &ip1, Ipoint &ip2)
 {
-  return sqrt(/*pow(ip1.x - ip2.x, 2) 
-            + pow(ip1.y - ip2.y, 2)*/
-            + pow(ip1.dx - ip2.dx, 2) 
-            + pow(ip1.dy - ip2.dy, 2));
+  return sqrt(pow(ip1.x - ip2.x, 2) 
+            + pow(ip1.y - ip2.y, 2)
+            /*+ pow(ip1.dx - ip2.dx, 2) 
+            + pow(ip1.dy - ip2.dy, 2)*/);
 }
 
 //-------------------------------------------------------
