@@ -76,7 +76,8 @@ int translateCorners(IpPairVec &matches, const CvPoint src_corners[4], CvPoint d
   _pt2 = cvMat(1, n, CV_32FC2, &pt2[0] );
 
   // Find the homography (transformation) between the two sets of points
-  if(!cvFindHomography(&_pt1, &_pt2, &_h, CV_RANSAC, 5))
+  //if(!cvFindHomography(&_pt1, &_pt2, &_h, CV_RANSAC, 5))  // this line requires opencv 1.1
+  if(!cvFindHomography(&_pt1, &_pt2, &_h))
     return 0;
 
   // Translate src_corners to dst_corners using homography
