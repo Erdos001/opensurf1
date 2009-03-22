@@ -9,12 +9,11 @@
 ************************************************************/
 
 #include "utils.h"
-#include <iostream>
 
 #include "surf.h"
 
 //-------------------------------------------------------
-//! Prior calculations (these need not be done at runtime)
+//! SURF priors (these need not be done at runtime)
 const float pi = 3.14159f;
 
 const double gauss25 [7][7] = {
@@ -126,7 +125,7 @@ void Surf::getOrientation()
   float ang1, ang2, ang;
 
   // loop slides pi/3 window around feature point
-  for(ang1 = 0; ang1 < 2*pi;  ang1+=0.1f) {
+  for(ang1 = 0; ang1 < 2*pi;  ang1+=0.15f) {
     ang2 = ( ang1+pi/3.0f > 2*pi ? ang1-5.0f*pi/3.0f : ang1+pi/3.0f);
     sumX = sumY = 0; 
     for(unsigned int k = 0; k < Ang.size(); k++) 
