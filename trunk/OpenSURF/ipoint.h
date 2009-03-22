@@ -42,7 +42,7 @@ public:
   float operator-(const Ipoint &rhs)
   {
     float sum=0.f;
-    for(int i=0; i < 64; i++)
+    for(int i=0; i < 64; ++i)
       sum += (this->descriptor[i] - rhs.descriptor[i])*(this->descriptor[i] - rhs.descriptor[i]);
     return sqrt(sum);
   };
