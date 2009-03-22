@@ -54,10 +54,10 @@ int mainImage(void)
 {
   // Declare Ipoints and other stuff
   IpVec ipts;
-  IplImage *img=cvLoadImage("Images/test.bmp");
+  IplImage *img=cvLoadImage("Images/img1.jpg");
 
   // Detect and describe interest points in the image
-  surfDetDes(img, ipts, true, 3, 4, 2, 0.001f);
+  surfDetDes(img, ipts, true, 3, 4, 2, 0.0004f);
 
   // Draw the detected points
   drawIpoints(img, ipts);
@@ -130,7 +130,9 @@ int mainMatch(void)
   IpVec ipts, ref_ipts;
   
   // This is the reference object we wish to find in video frame
-  IplImage *img = cvLoadImage("Images/test.jpg");
+  // Replace the line below with IplImage *img = cvLoadImage("Images/object.jpg"); 
+  // where object.jpg is the planar object to be located in the video
+  IplImage *img = NULL; 
   CvPoint src_corners[4] = {{0,0}, {img->width,0}, {img->width, img->height}, {0, img->height}};
   CvPoint dst_corners[4];
 
@@ -163,7 +165,7 @@ int mainMatch(void)
           cvPoint(r2.x, r2.y), cvScalar(255,255,255), 3 );
       }
 
-      for (int i = 0; i < matches.size(); ++i)
+      for (unsigned int i = 0; i < matches.size(); ++i)
         drawIpoint(img, matches[i].first);
     }
 
@@ -276,7 +278,7 @@ int mainStaticMatch()
 
 int mainKmeans(void)
 {
-  IplImage *img = cvLoadImage("Images/test.bmp");
+  IplImage *img = cvLoadImage("Images/img1.jpg");
   IpVec ipts;
   Kmeans km;
   
@@ -286,11 +288,11 @@ int mainKmeans(void)
   for (int repeat = 0; repeat < 10; ++repeat)
   {
 
-    IplImage *img = cvLoadImage("Images/test.bmp");
+    IplImage *img = cvLoadImage("Images/img1.jpg");
     km.Run(&ipts, 5, true);
     drawPoints(img, km.clusters);
 
-    for (int i = 0; i < ipts.size(); ++i)
+    for (unsigned int i = 0; i < ipts.size(); ++i)
     {
       cvLine(img, cvPoint(ipts[i].x,ipts[i].y), cvPoint(km.clusters[ipts[i].clusterIndex].x ,km.clusters[ipts[i].clusterIndex].y),cvScalar(255,255,255));
     }

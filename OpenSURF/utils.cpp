@@ -62,6 +62,9 @@ void showImage(char *title, IplImage *img)
 // Convert image to single channel 32F
 IplImage* getGray(IplImage *img)
 {
+  // Check we have been supplied a non-null img pointer
+  if (!img) error("Unable to create grayscale image.  No image supplied");
+
   IplImage* gray8, * gray32;
 
   gray8 = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
