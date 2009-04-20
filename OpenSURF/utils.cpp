@@ -60,20 +60,21 @@ void showImage(char *title, IplImage *img)
 //-------------------------------------------------------
 
 // Convert image to single channel 32F
-IplImage* getGray(IplImage *img)
+IplImage *getGray(IplImage *img)
 {
   // Check we have been supplied a non-null img pointer
   if (!img) error("Unable to create grayscale image.  No image supplied");
 
   IplImage* gray8, * gray32;
 
-  gray8 = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
   gray32 = cvCreateImage( cvGetSize(img), IPL_DEPTH_32F, 1 );
 
   if( img->nChannels == 1 )
     gray8 = (IplImage *) cvClone( img );
-  else
+  else {
+    gray8 = cvCreateImage( cvGetSize(img), IPL_DEPTH_8U, 1 );
     cvCvtColor( img, gray8, CV_BGR2GRAY );
+  }
 
   cvConvertScale( gray8, gray32, 1.0 / 255.0, 0 );
 
