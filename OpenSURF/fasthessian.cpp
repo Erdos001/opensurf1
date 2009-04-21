@@ -119,17 +119,17 @@ void FastHessian::getIpoints()
     int border = border_cache[o];
 
     // 3x3x3 non-max suppression over whole image
-    for(int i = 1; i < intervals-1; i += 3) {
-      for(int r = border; r < i_height - border; r += 3*step) {
-        for(int c = border; c < i_width - border; c += 3*step) {
+    for(int i = 1; i < intervals-1; i += 2) {
+      for(int r = border; r < i_height - border; r += 2*step) {
+        for(int c = border; c < i_width - border; c += 2*step) {
 
           int i_max = -1, r_max = -1, c_max = -1;
           float max_val = 0;
 
           // Scan the pixels in this block to find the local extremum.
-          for (int ii = i; ii < min(i+3, intervals-1); ii += 1) {
-            for (int rr = r; rr < min(r+3*step, i_height - border); rr += step) {
-              for (int cc = c; cc < min(c +3*step, i_width - border); cc += step) {
+          for (int ii = i; ii < min(i+2, intervals-1); ii += 1) {
+            for (int rr = r; rr < min(r+2*step, i_height - border); rr += step) {
+              for (int cc = c; cc < min(c+2*step, i_width - border); cc += step) {
 
                 float val = getVal(o, ii, cc, rr);
                 
@@ -181,13 +181,13 @@ void FastHessian::buildDet()
         for(int c = border; c < i_width - border; c += step) 
         {
           Dxx = BoxIntegral(img, r - l + 1, c - b, 2*l - 1, w)
-            - BoxIntegral(img, r - l + 1, c - l / 2, 2*l - 1, l)*3;
+              - BoxIntegral(img, r - l + 1, c - l / 2, 2*l - 1, l)*3;
           Dyy = BoxIntegral(img, r - b, c - l + 1, w, 2*l - 1)
-            - BoxIntegral(img, r - l / 2, c - l + 1, l, 2*l - 1)*3;
+              - BoxIntegral(img, r - l / 2, c - l + 1, l, 2*l - 1)*3;
           Dxy = + BoxIntegral(img, r - l, c + 1, l, l)
-            + BoxIntegral(img, r + 1, c - l, l, l)
-            - BoxIntegral(img, r - l, c - l, l, l)
-            - BoxIntegral(img, r + 1, c + 1, l, l);
+                + BoxIntegral(img, r + 1, c - l, l, l)
+                - BoxIntegral(img, r - l, c - l, l, l)
+                - BoxIntegral(img, r + 1, c + 1, l, l);
 
           // Normalise the filter responses with respect to their size
           Dxx *= inverse_area;
@@ -272,9 +272,9 @@ void FastHessian::interpolateExtremum(int octv, int intvl, int r, int c)
   {
     // Create Ipoint and push onto Ipoints vector
     Ipoint ipt;
-    ipt.x = (float) (c + step*xc);
-    ipt.y = (float) (r + step*xr);
-    ipt.scale = (float) ((1.2f/9.0f) * (3*(pow(2.0f, octv+1) * (intvl+xi+1)+1)));
+    ipt.x = static_cast<float>(c + step*xc);
+    ipt.y = static_cast<float>(r + step*xr);
+    ipt.scale = static_cast<float>((1.2f/9.0f) * (3*(pow(2.0f, octv+1) * (intvl+xi+1)+1)));
     ipt.laplacian = getLaplacian(octv, intvl, c, r);
     ipts.push_back(ipt);
   }
@@ -314,11 +314,11 @@ CvMat* FastHessian::deriv3D( int octv, int intvl, int r, int c )
   int step = init_sample * fRound(pow(2.0f,octv));
 
   dx = ( getVal(octv,intvl, c+step, r ) -
-    getVal( octv,intvl, c-step, r ) ) / 2.0;
+         getVal( octv,intvl, c-step, r ) ) / 2.0;
   dy = ( getVal( octv,intvl, c, r+step ) -
-    getVal( octv,intvl, c, r-step ) ) / 2.0;
+         getVal( octv,intvl, c, r-step ) ) / 2.0;
   ds = ( getVal( octv,intvl+1, c, r ) -
-    getVal( octv,intvl-1, c, r ) ) / 2.0;
+         getVal( octv,intvl-1, c, r ) ) / 2.0;
 
   dI = cvCreateMat( 3, 1, CV_64FC1 );
   cvmSet( dI, 0, 0, dx );
@@ -339,23 +339,23 @@ CvMat* FastHessian::hessian3D(int octv, int intvl, int r, int c )
 
   v = getVal( octv,intvl, c, r );
   dxx = ( getVal( octv,intvl, c+step, r ) + 
-    getVal( octv,intvl, c-step, r ) - 2 * v );
+          getVal( octv,intvl, c-step, r ) - 2 * v );
   dyy = ( getVal( octv,intvl, c, r+step ) +
-    getVal( octv,intvl, c, r-step ) - 2 * v );
+          getVal( octv,intvl, c, r-step ) - 2 * v );
   dss = ( getVal( octv,intvl+1, c, r ) +
-    getVal( octv,intvl-1, c, r ) - 2 * v );
+          getVal( octv,intvl-1, c, r ) - 2 * v );
   dxy = ( getVal( octv,intvl, c+step, r+step ) -
-    getVal( octv,intvl, c-step, r+step ) -
-    getVal( octv,intvl, c+step, r-step ) +
-    getVal( octv,intvl, c-step, r-step ) ) / 4.0;
+          getVal( octv,intvl, c-step, r+step ) -
+          getVal( octv,intvl, c+step, r-step ) +
+          getVal( octv,intvl, c-step, r-step ) ) / 4.0;
   dxs = ( getVal( octv,intvl+1, c+step, r ) -
-    getVal( octv,intvl+1, c-step, r ) -
-    getVal( octv,intvl-1, c+step, r ) +
-    getVal( octv,intvl-1, c-step, r ) ) / 4.0;
+          getVal( octv,intvl+1, c-step, r ) -
+          getVal( octv,intvl-1, c+step, r ) +
+          getVal( octv,intvl-1, c-step, r ) ) / 4.0;
   dys = ( getVal( octv,intvl+1, c, r+step ) -
-    getVal( octv,intvl+1, c, r-step ) -
-    getVal( octv,intvl-1, c, r+step ) +
-    getVal( octv,intvl-1, c, r-step ) ) / 4.0;
+          getVal( octv,intvl+1, c, r-step ) -
+          getVal( octv,intvl-1, c, r+step ) +
+          getVal( octv,intvl-1, c, r-step ) ) / 4.0;
 
   H = cvCreateMat( 3, 3, CV_64FC1 );
   cvmSet( H, 0, 0, dxx );

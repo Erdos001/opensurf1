@@ -23,7 +23,7 @@
 //  - 3 to match find an object in an image (work in progress)
 //  - 4 to display moving features (work in progress)
 //  - 5 to show matches between static images
-#define PROCEDURE 1
+#define PROCEDURE 3
 
 //-------------------------------------------------------
 
@@ -92,7 +92,7 @@ int mainVideo(void)
     img = cvQueryFrame(capture);
 
     // Extract surf points
-    surfDetDes(img, ipts, true, 3, 4, 2, 0.0004f);    
+    surfDetDes(img, ipts, true, 3, 4, 2, 0.004f);    
 
     // Draw the detected points
     drawIpoints(img, ipts);
@@ -122,9 +122,6 @@ int mainMatch(void)
   CvCapture* capture = cvCaptureFromCAM( CV_CAP_ANY );
   if(!capture) error("No Capture");
 
-  // Create a window 
-  cvNamedWindow("OpenSURF", CV_WINDOW_AUTOSIZE );
-
   // Declare Ipoints and other stuff
   IpPairVec matches;
   IpVec ipts, ref_ipts;
@@ -133,22 +130,26 @@ int mainMatch(void)
   // Replace the line below with IplImage *img = cvLoadImage("Images/object.jpg"); 
   // where object.jpg is the planar object to be located in the video
   IplImage *img = NULL; 
+  if (img == NULL) error("Need to load reference image in order to run matching procedure");
   CvPoint src_corners[4] = {{0,0}, {img->width,0}, {img->width, img->height}, {0, img->height}};
   CvPoint dst_corners[4];
 
   // Extract reference object Ipoints
-  surfDetDes(img, ref_ipts, false, 4, 4, 2, 0.0002f);
+  surfDetDes(img, ref_ipts, false, 4, 4, 2, 0.001f);
   drawIpoints(img, ref_ipts);
   showImage(img);
 
+  // Create a window 
+  cvNamedWindow("OpenSURF", CV_WINDOW_AUTOSIZE );
+
   // Main capture loop
-  while( 1 ) 
+  while( true ) 
   {
     // Grab frame from the capture source
     img = cvQueryFrame(capture);
      
     // Detect and describe interest points in the frame
-    surfDetDes(img, ipts, false, 4, 4, 2, 0.0002f);
+    surfDetDes(img, ipts, false, 4, 4, 2, 0.001f);
 
     // Fill match vector
     getMatches(ipts,ref_ipts,matches);
