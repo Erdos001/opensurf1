@@ -298,6 +298,9 @@ void saveSurf(char *filename, vector<Ipoint> &ipts)
     outfile << ipts.at(i).scale << "  ";
     outfile << ipts.at(i).x << " ";
     outfile << ipts.at(i).y << " ";
+    outfile << ipts.at(i).orientation << " ";
+    outfile << ipts.at(i).laplacian << " ";
+    outfile << ipts.at(i).scale << " ";
     for(int j=0; j<64; j++)
       outfile << ipts.at(i).descriptor[j] << " ";
 
@@ -312,27 +315,30 @@ void saveSurf(char *filename, vector<Ipoint> &ipts)
 //! Load the SURF features from file
 void loadSurf(char *filename, vector<Ipoint> &ipts)
 {
-  int count;
-  float temp;
+  int descriptorLength, count;
   ifstream infile(filename);
 
-  // output descriptor length
-  infile >> count;
+  // clear the ipts vector first
+  ipts.clear();
+
+  // read descriptor length/number of ipoints
+  infile >> descriptorLength;
   infile >> count;
 
+  // for each ipoint
   for (int i = 0; i < count; i++) 
   {
     Ipoint ipt;
 
+    // read vals
+    infile >> ipt.scale; 
     infile >> ipt.x;
     infile >> ipt.y;
-    infile >> temp;
-    ipt.scale = temp; 
-    ipt.laplacian = 1;
+    infile >> ipt.orientation;
+    infile >> ipt.laplacian;
+    infile >> ipt.scale;
 
-    for (int j = 0; j < 3; j++)
-      infile >> temp;
-
+    // read descriptor components
     for (int j = 0; j < 64; j++)
       infile >> ipt.descriptor[j];
 
