@@ -19,7 +19,7 @@ IplImage *Integral(IplImage *img);
 
 //! Computes the sum of pixels within the rectangle specified by the top-left start
 //! co-ordinate and size
-float BoxIntegral(IplImage *img, int row, int col, int rows, int cols);
+extern inline float BoxIntegral(IplImage *img, int row, int col, int rows, int cols);
 
 
 #endif

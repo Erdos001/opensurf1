@@ -59,7 +59,7 @@ IplImage *Integral(IplImage *source)
 
 //! Computes the sum of pixels within the rectangle specified by the top-left start
 //! co-ordinate and size
-float BoxIntegral(IplImage *img, int row, int col, int rows, int cols) 
+inline float BoxIntegral(IplImage *img, int row, int col, int rows, int cols) 
 {
   float *data = (float *) img->imageData;
   int step = img->widthStep/sizeof(float);
