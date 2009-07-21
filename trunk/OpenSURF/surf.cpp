@@ -232,13 +232,12 @@ void Surf::getDescriptor()
 //! Modified descriptor contributed by Pablo Fernandez
 void Surf::getMDescriptor()
 {
-
   int y, x, sample_x, sample_y, count=0;
-  float scale, *desc, dx, dy, mdx, mdy, co, si;
-  float gauss = 0.0, gauss_s = 0.0, xs = 0.0, ys = 0.0;
-  float rx = 0.0, ry = 0.0, rrx = 0.0, rry = 0.0, len = 0.0;
-
   int i = 0, ix = 0, j = 0, jx = 0;
+  float scale, *desc, dx, dy, mdx, mdy, co, si;
+  float gauss_s1 = 0.0, gauss_s2 = 0.0, xs = 0.0, ys = 0.0;
+  float rx = 0.0, ry = 0.0, rrx = 0.0, rry = 0.0, len = 0.0;
+  float cx = -0.5f, cy = 0.0f; //Subregion centers for the 4x4 gaussian weighting
 
   Ipoint *ipt = &ipts.at(index);
   scale = ipt->scale;
@@ -258,9 +257,13 @@ void Surf::getMDescriptor()
     j = -8;
     i = i-4;
 
+    cx += 1.0;
+    cy = -0.5;
+
     while(j < 12) 
     {
       dx=dy=mdx=mdy=0.0;
+      cy += 1.0;
 
       j = j - 4;
 
@@ -279,7 +282,7 @@ void Surf::getMDescriptor()
           sample_y = fRound(y + ( l*scale*co + k*scale*si));
 
           //Get the gaussian weighted x and y responses
-          gauss_s = gaussian(xs-sample_x,ys-sample_y,2.5*scale);
+          gauss_s1 = gaussian(xs-sample_x,ys-sample_y,2.5*scale);
 
           rx = haarX(sample_y, sample_x, 2*fRound(scale));
           ry = haarY(sample_y, sample_x, 2*fRound(scale));
@@ -288,8 +291,8 @@ void Surf::getMDescriptor()
           rrx = -rx*si + ry*co;
           rry = rx*co + ry*si;
 
-          rrx = gauss_s*rrx;
-          rry = gauss_s*rry;
+          rrx = gauss_s1*rrx;
+          rry = gauss_s1*rry;
 
           dx += rrx;
           dy += rry;
@@ -300,12 +303,12 @@ void Surf::getMDescriptor()
       }
 
       //Add the values to the descriptor vector
-      gauss = gaussian(ys-y,xs-x,1.5*scale);
+      gauss_s2 = gaussian(cx-2.0f,cy-2.0f,1.5f);
 
-      dx = dx*gauss;
-      dy = dy*gauss;
-      mdx = mdx*gauss;
-      mdy = mdy*gauss;
+      dx = dx*gauss_s2;
+      dy = dy*gauss_s2;
+      mdx = mdx*gauss_s2;
+      mdy = mdy*gauss_s2;
 
       desc[count++] = dx;
       desc[count++] = dy;
@@ -316,7 +319,6 @@ void Surf::getMDescriptor()
 
       j += 9;
     }
-
     i += 9;
   }
 
@@ -327,6 +329,7 @@ void Surf::getMDescriptor()
     desc[i] /= len;
 
 }
+
 
 //-------------------------------------------------------
 
