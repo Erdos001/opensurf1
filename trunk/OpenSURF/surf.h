@@ -37,11 +37,8 @@ class Surf {
     //! Assign the current Ipoint an orientation
     void getOrientation();
     
-    //! Get the descriptor vector of the current Ipoint
-	  void getDescriptor();
-
-    //! Get the modified descriptor. See Agrawal ECCV 08
-    void getMDescriptor();
+    //! Get the descriptor. See Agrawal ECCV 08
+    void getDescriptor();
 
     //! Get the upright descriptor vector of the current Ipoint
     void getUprightDescriptor();

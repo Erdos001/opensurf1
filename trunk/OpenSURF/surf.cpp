@@ -163,81 +163,16 @@ void Surf::getOrientation()
 
 //-------------------------------------------------------
 
-//! Get the descriptor vector of the provided Ipoint
+//! Get the modified descriptor. See Agrawal ECCV 08
+//! Modified descriptor contributed by Pablo Fernandez
 void Surf::getDescriptor()
 {
   int y, x, sample_x, sample_y, count=0;
+  int i = 0, ix = 0, j = 0, jx = 0, xs = 0, ys = 0;
   float scale, *desc, dx, dy, mdx, mdy, co, si;
-  float gauss, rx, ry, rrx, rry, len=0;
-
-  Ipoint *ipt = &ipts.at(index);
-  scale = ipt->scale;
-  x = fRound(ipt->x);
-  y = fRound(ipt->y);  
-  co = cos(ipt->orientation);
-  si = sin(ipt->orientation);
-  desc = ipt->descriptor;
-
-  // Calculate descriptor for this interest point
-  for (int i = -10; i < 10; i+=5)
-  {
-    for (int j = -10; j < 10; j+=5) 
-    {
-      dx=dy=mdx=mdy=0;
-      for (int k = i; k < i + 5; ++k) 
-      {
-        for (int l = j; l < j + 5; ++l) 
-        {
-          // Get coords of sample point on the rotated axis
-          sample_x = fRound(x + (-l*scale*si + k*scale*co));
-          sample_y = fRound(y + ( l*scale*co + k*scale*si));
-
-          // Get the gaussian weighted x and y responses
-          gauss = static_cast<float>(gauss33[abs(k)][abs(l)]);
-          rx = gauss * haarX(sample_y, sample_x, 2*fRound(scale));
-          ry = gauss * haarY(sample_y, sample_x, 2*fRound(scale));
-
-          // Get the gaussian weighted x and y responses on rotated axis
-          rrx = -rx*si + ry*co;
-          rry = rx*co + ry*si;
-
-          dx += rrx;
-          dy += rry;
-          mdx += fabs(rrx);
-          mdy += fabs(rry);
-        }
-      }
-
-      // add the values to the descriptor vector
-      desc[count++] = dx;
-      desc[count++] = dy;
-      desc[count++] = mdx;
-      desc[count++] = mdy;
-
-      // store the current length^2 of the vector
-      len += dx*dx + dy*dy + mdx*mdx + mdy*mdy;
-    }
-  }
-
-  // convert to unit vector
-  len = sqrt(len);
-  for(int i = 0; i < 64; i++)
-    desc[i] /= len;
-
-}
-
-//-------------------------------------------------------
-
-//! Get the modified descriptor. See Agrawal ECCV 08
-//! Modified descriptor contributed by Pablo Fernandez
-void Surf::getMDescriptor()
-{
-  int y, x, sample_x, sample_y, count=0;
-  int i = 0, ix = 0, j = 0, jx = 0;
-  float scale, *desc, dx, dy, mdx, mdy, co, si;
-  float gauss_s1 = 0.0, gauss_s2 = 0.0, xs = 0.0, ys = 0.0;
-  float rx = 0.0, ry = 0.0, rrx = 0.0, rry = 0.0, len = 0.0;
-  float cx = -0.5f, cy = 0.0f; //Subregion centers for the 4x4 gaussian weighting
+  float gauss_s1 = 0.f, gauss_s2 = 0.f;
+  float rx = 0.f, ry = 0.f, rrx = 0.f, rry = 0.f, len = 0.f;
+  float cx = -0.5f, cy = 0.f; //Subregion centers for the 4x4 gaussian weighting
 
   Ipoint *ipt = &ipts.at(index);
   scale = ipt->scale;
@@ -257,13 +192,13 @@ void Surf::getMDescriptor()
     j = -8;
     i = i-4;
 
-    cx += 1.0;
-    cy = -0.5;
+    cx += 1.f;
+    cy = -0.5f;
 
     while(j < 12) 
     {
-      dx=dy=mdx=mdy=0.0;
-      cy += 1.0;
+      dx=dy=mdx=mdy=0.f;
+      cy += 1.f;
 
       j = j - 4;
 
@@ -282,7 +217,7 @@ void Surf::getMDescriptor()
           sample_y = fRound(y + ( l*scale*co + k*scale*si));
 
           //Get the gaussian weighted x and y responses
-          gauss_s1 = gaussian(xs-sample_x,ys-sample_y,2.5*scale);
+          gauss_s1 = gaussian(xs-sample_x,ys-sample_y,2.5f*scale);
 
           rx = haarX(sample_y, sample_x, 2*fRound(scale));
           ry = haarY(sample_y, sample_x, 2*fRound(scale));
@@ -305,15 +240,10 @@ void Surf::getMDescriptor()
       //Add the values to the descriptor vector
       gauss_s2 = gaussian(cx-2.0f,cy-2.0f,1.5f);
 
-      dx = dx*gauss_s2;
-      dy = dy*gauss_s2;
-      mdx = mdx*gauss_s2;
-      mdy = mdy*gauss_s2;
-
-      desc[count++] = dx;
-      desc[count++] = dy;
-      desc[count++] = mdx;
-      desc[count++] = mdy;
+      desc[count++] = dx*gauss_s2;
+      desc[count++] = dy*gauss_s2;
+      desc[count++] = mdx*gauss_s2;
+      desc[count++] = mdy*gauss_s2;
 
       len += dx*dx + dy*dy + mdx*mdx + mdy*mdy;
 
@@ -324,7 +254,6 @@ void Surf::getMDescriptor()
 
   //Convert to Unit Vector
   len = sqrt(len);
-
   for(int i = 0; i < 64; i++)
     desc[i] /= len;
 
