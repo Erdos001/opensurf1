@@ -40,6 +40,9 @@ class Surf {
     //! Get the descriptor vector of the current Ipoint
 	  void getDescriptor();
 
+    //! Get the modified descriptor. See Agrawal ECCV 08
+    void getMDescriptor();
+
     //! Get the upright descriptor vector of the current Ipoint
     void getUprightDescriptor();
 
