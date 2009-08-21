@@ -18,16 +18,16 @@
 
 
 //! Display error message and terminate program
-void error(char *msg);
+void error(const char *msg);
 
 //! Show the provided image and wait for keypress
-void showImage(IplImage *img);
+void showImage(const IplImage *img);
 
 //! Show the provided image in titled window and wait for keypress
-void showImage(char *title, IplImage *img);
+void showImage(char *title,const IplImage *img);
 
 // Convert image to single channel 32F
-IplImage* getGray(IplImage *img);
+IplImage* getGray(const IplImage *img);
 
 //! Draw a single feature on the image
 void drawIpoint(IplImage *img, Ipoint &ipt, int tailSize = 0);

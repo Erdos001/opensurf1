@@ -21,9 +21,6 @@ class Surf {
   
   public:
     
-    //! Destructor
-    ~Surf();
-
     //! Standard Constructor (img is an integral image)
     Surf(IplImage *img, std::vector<Ipoint> &ipts);
 

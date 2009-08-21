@@ -30,7 +30,7 @@ static const CvScalar COLOURS [] = {cvScalar(255,0,0), cvScalar(0,255,0),
 //-------------------------------------------------------
 
 //! Display error message and terminate program
-void error(char *msg) 
+void error(const char *msg) 
 {
   cout << "\nError: " << msg;
   getchar();
@@ -40,7 +40,7 @@ void error(char *msg)
 //-------------------------------------------------------
 
 //! Show the provided image and wait for keypress
-void showImage(IplImage *img)
+void showImage(const IplImage *img)
 {
   cvNamedWindow("Surf", CV_WINDOW_AUTOSIZE); 
   cvShowImage("Surf", img);  
@@ -50,7 +50,7 @@ void showImage(IplImage *img)
 //-------------------------------------------------------
 
 //! Show the provided image in titled window and wait for keypress
-void showImage(char *title, IplImage *img)
+void showImage(char *title,const IplImage *img)
 {
   cvNamedWindow(title, CV_WINDOW_AUTOSIZE); 
   cvShowImage(title, img);  
@@ -60,7 +60,7 @@ void showImage(char *title, IplImage *img)
 //-------------------------------------------------------
 
 // Convert image to single channel 32F
-IplImage *getGray(IplImage *img)
+IplImage *getGray(const IplImage *img)
 {
   // Check we have been supplied a non-null img pointer
   if (!img) error("Unable to create grayscale image.  No image supplied");

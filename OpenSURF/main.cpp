@@ -56,8 +56,12 @@ int mainImage(void)
   IpVec ipts;
   IplImage *img=cvLoadImage("Images/img1.jpg");
 
+  clock_t start = clock();
   // Detect and describe interest points in the image
-  surfDetDes(img, ipts, true, 3, 4, 2, 0.0004f);
+  surfDetDes(img, ipts, false, 3, 4, 2, 0.0004f); 
+  clock_t end = clock();
+
+  std::cout<< "OpenSURF took: " << end - start << " clocks" << std::endl;
 
   // Draw the detected points
   drawIpoints(img, ipts);
@@ -129,13 +133,13 @@ int mainMatch(void)
   // This is the reference object we wish to find in video frame
   // Replace the line below with IplImage *img = cvLoadImage("Images/object.jpg"); 
   // where object.jpg is the planar object to be located in the video
-  IplImage *img = NULL; 
+  IplImage *img = cvLoadImage("Images/object.jpg"); 
   if (img == NULL) error("Need to load reference image in order to run matching procedure");
   CvPoint src_corners[4] = {{0,0}, {img->width,0}, {img->width, img->height}, {0, img->height}};
   CvPoint dst_corners[4];
 
   // Extract reference object Ipoints
-  surfDetDes(img, ref_ipts, false, 4, 4, 2, 0.001f);
+  surfDetDes(img, ref_ipts, false, 3, 4, 3, 0.004f);
   drawIpoints(img, ref_ipts);
   showImage(img);
 
@@ -149,7 +153,7 @@ int mainMatch(void)
     img = cvQueryFrame(capture);
      
     // Detect and describe interest points in the frame
-    surfDetDes(img, ipts, false, 4, 4, 2, 0.001f);
+    surfDetDes(img, ipts, false, 3, 4, 3, 0.004f);
 
     // Fill match vector
     getMatches(ipts,ref_ipts,matches);
@@ -218,8 +222,8 @@ int mainMotionPoints(void)
     getMatches(ipts,old_ipts,matches);
     for (unsigned int i = 0; i < matches.size(); ++i) 
     {
-      float dx = matches[i].first.dx;
-      float dy = matches[i].first.dy;
+      const float & dx = matches[i].first.dx;
+      const float & dy = matches[i].first.dy;
       float speed = sqrt(dx*dx+dy*dy);
       if (speed > 5 && speed < 30) 
         drawIpoint(img, matches[i].first, 3);
@@ -259,7 +263,7 @@ int mainStaticMatch()
     drawPoint(img1,matches[i].first);
     drawPoint(img2,matches[i].second);
   
-    int w = img1->width;
+    const int & w = img1->width;
     cvLine(img1,cvPoint(matches[i].first.x,matches[i].first.y),cvPoint(matches[i].second.x+w,matches[i].second.y), cvScalar(255,255,255),1);
     cvLine(img2,cvPoint(matches[i].first.x-w,matches[i].first.y),cvPoint(matches[i].second.x,matches[i].second.y), cvScalar(255,255,255),1);
   }
