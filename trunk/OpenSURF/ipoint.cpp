@@ -33,7 +33,7 @@ void getMatches(IpVec &ipts1, IpVec &ipts2, IpPairVec &matches)
     }
 
     // If match has a d1:d2 ratio < 0.65 ipoints are a match
-    if(d1/d2 < 0.65) 
+    if(d1/d2 < 0.7) 
     { 
       // Store the change in position
       ipts1[i].dx = match->x - ipts1[i].x; 

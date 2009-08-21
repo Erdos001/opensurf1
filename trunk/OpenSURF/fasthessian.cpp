@@ -261,7 +261,6 @@ inline int FastHessian::getLaplacian(int o, int i, int c, int r)
 void FastHessian::interpolateExtremum(int octv, int intvl, int r, int c)
 {
   double xi = 0, xr = 0, xc = 0;
-  int i = 0;
   int step = init_sample * fRound(pow(2.0f,octv));
 
   // Get the offsets to the actual location of the extremum

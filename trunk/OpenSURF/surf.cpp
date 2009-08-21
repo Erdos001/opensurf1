@@ -42,11 +42,6 @@ const double gauss33 [11][11] = {
 
 //-------------------------------------------------------
 
-//! Destructor
-Surf::~Surf()
-{
-}
-
 //-------------------------------------------------------
 
 //! Constructor
@@ -100,10 +95,12 @@ void Surf::getDescriptors(bool upright)
 void Surf::getOrientation()
 {
   Ipoint *ipt = &ipts.at(index);
-  float gauss, scale = ipt->scale;
-  int s = fRound(scale), r = fRound(ipt->y), c = fRound(ipt->x);
-  std::vector<float> resX, resY, Ang;
+  float gauss = 0.f, scale = ipt->scale;
+  const int s = fRound(scale), r = fRound(ipt->y), c = fRound(ipt->x);
+  std::vector<float> resX(109), resY(109), Ang(109);
+  const int id[] = {6,5,4,3,2,1,0,1,2,3,4,5,6};
 
+  int idx = 0;
   // calculate haar responses for points within radius of 6*scale
   for(int i = -6; i <= 6; ++i) 
   {
@@ -111,27 +108,28 @@ void Surf::getOrientation()
     {
       if(i*i + j*j < 36) 
       {
-        gauss = static_cast<float>(gauss25[abs(i)][abs(j)]);
-        resX.push_back( gauss * haarX(r+j*s, c+i*s, 4*s) );
-        resY.push_back( gauss * haarY(r+j*s, c+i*s, 4*s) );
-        Ang.push_back(getAngle(resX.back(), resY.back()));
+        gauss = static_cast<float>(gauss25[id[i+6]][id[j+6]]);
+        resX[idx]=( gauss * haarX(r+j*s, c+i*s, 4*s) );
+        resY[idx]=( gauss * haarY(r+j*s, c+i*s, 4*s) );
+        Ang[idx]=(getAngle(resX[idx], resY[idx]));
+        ++idx;
       }
     }
   }
 
   // calculate the dominant direction 
-  float sumX, sumY;
-  float max=0, old_max = 0, orientation = 0, old_orientation = 0;
-  float ang1, ang2, ang;
+  float sumX=0.f, sumY=0.f;
+  float max=0.f, orientation = 0.f;
+  float ang1=0.f, ang2=0.f;
 
   // loop slides pi/3 window around feature point
   for(ang1 = 0; ang1 < 2*pi;  ang1+=0.15f) {
     ang2 = ( ang1+pi/3.0f > 2*pi ? ang1-5.0f*pi/3.0f : ang1+pi/3.0f);
-    sumX = sumY = 0; 
-    for(unsigned int k = 0; k < Ang.size(); k++) 
+    sumX = sumY = 0.f; 
+    for(unsigned int k = 0; k < Ang.size(); ++k) 
     {
       // get angle from the x-axis of the sample point
-      ang = Ang.at(k);
+      const float & ang = Ang.at(k);
 
       // determine whether the point is within the window
       if (ang1 < ang2 && ang1 < ang && ang < ang2) 
@@ -254,7 +252,7 @@ void Surf::getDescriptor()
 
   //Convert to Unit Vector
   len = sqrt(len);
-  for(int i = 0; i < 64; i++)
+  for(int i = 0; i < 64; ++i)
     desc[i] /= len;
 
 }
@@ -280,7 +278,7 @@ void Surf::getUprightDescriptor()
   {
     for (int j = -10; j < 10; j+=5) 
     {
-      dx=dy=mdx=mdy=0;
+      dx=dy=mdx=mdy=0.f;
       for (int k = i; k < i + 5; ++k) 
       {
         for (int l = j; l < j + 5; ++l) 
@@ -310,7 +308,7 @@ void Surf::getUprightDescriptor()
 
   // convert to unit vector
   len = sqrt(len);
-  for(int i = 0; i < 64; i++)
+  for(int i = 0; i < 64; ++i)
     desc[i] /= len;
 
 }
