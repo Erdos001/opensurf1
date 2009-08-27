@@ -243,7 +243,7 @@ void Surf::getDescriptor()
       desc[count++] = mdx*gauss_s2;
       desc[count++] = mdy*gauss_s2;
 
-      len += dx*dx + dy*dy + mdx*mdx + mdy*mdy;
+      len += (dx*dx + dy*dy + mdx*mdx + mdy*mdy) * gauss_s2*gauss_s2;
 
       j += 9;
     }
