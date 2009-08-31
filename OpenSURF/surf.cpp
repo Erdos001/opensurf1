@@ -54,7 +54,7 @@ Surf::Surf(IplImage *img, IpVec &ipts)
 //-------------------------------------------------------
 
 //! Describe all features in the supplied vector
-void Surf::getDescriptors(bool bUpright)
+void Surf::getDescriptors(bool upright)
 {
   // Check there are Ipoints to be described
   if (!ipts.size()) return;
@@ -62,7 +62,7 @@ void Surf::getDescriptors(bool bUpright)
   // Get the size of the vector for fixed loop bounds
   int ipts_size = (int)ipts.size();
 
-  if (bUpright)
+  if (upright)
   {
     // U-SURF loop just gets descriptors
     for (int i = 0; i < ipts_size; ++i)
@@ -94,7 +94,7 @@ void Surf::getDescriptors(bool bUpright)
 //! Assign the supplied Ipoint an orientation
 void Surf::getOrientation()
 {
-  Ipoint *ipt = &ipts.at(index);
+  Ipoint *ipt = &ipts[index];
   float gauss = 0.f, scale = ipt->scale;
   const int s = fRound(scale), r = fRound(ipt->y), c = fRound(ipt->x);
   std::vector<float> resX(109), resY(109), Ang(109);
@@ -109,9 +109,9 @@ void Surf::getOrientation()
       if(i*i + j*j < 36) 
       {
         gauss = static_cast<float>(gauss25[id[i+6]][id[j+6]]);
-        resX[idx]=( gauss * haarX(r+j*s, c+i*s, 4*s) );
-        resY[idx]=( gauss * haarY(r+j*s, c+i*s, 4*s) );
-        Ang[idx]=(getAngle(resX[idx], resY[idx]));
+        resX[idx] = gauss * haarX(r+j*s, c+i*s, 4*s);
+        resY[idx] = gauss * haarY(r+j*s, c+i*s, 4*s);
+        Ang[idx] = getAngle(resX[idx], resY[idx]);
         ++idx;
       }
     }
@@ -129,19 +129,19 @@ void Surf::getOrientation()
     for(unsigned int k = 0; k < Ang.size(); ++k) 
     {
       // get angle from the x-axis of the sample point
-      const float & ang = Ang.at(k);
+      const float & ang = Ang[k];
 
       // determine whether the point is within the window
       if (ang1 < ang2 && ang1 < ang && ang < ang2) 
       {
-        sumX+=resX.at(k);  
-        sumY+=resY.at(k);
+        sumX+=resX[k];  
+        sumY+=resY[k];
       } 
       else if (ang2 < ang1 && 
         ((ang > 0 && ang < ang2) || (ang > ang1 && ang < 2*pi) )) 
       {
-        sumX+=resX.at(k);  
-        sumY+=resY.at(k);
+        sumX+=resX[k];  
+        sumY+=resY[k];
       }
     }
 
@@ -172,14 +172,18 @@ void Surf::getDescriptor(bool bUpright)
   float rx = 0.f, ry = 0.f, rrx = 0.f, rry = 0.f, len = 0.f;
   float cx = -0.5f, cy = 0.f; //Subregion centers for the 4x4 gaussian weighting
 
-  Ipoint *ipt = &ipts.at(index);
+  Ipoint *ipt = &ipts[index];
   scale = ipt->scale;
   x = fRound(ipt->x);
   y = fRound(ipt->y);  
   desc = ipt->descriptor;
 
-  // If we're not in upright mode calculate sin/cos angle
-  if (!bUpright)
+  if (bUpright)
+  {
+    co = 1;
+    si = 0;
+  }
+  else
   {
     co = cos(ipt->orientation);
     si = sin(ipt->orientation);
@@ -188,8 +192,6 @@ void Surf::getDescriptor(bool bUpright)
   i = -8;
 
   //Calculate descriptor for this interest point
-  //Area of size 24 s x 24 s
-  //***********************************************
   while(i < 12)
   {
     j = -8;
@@ -208,15 +210,8 @@ void Surf::getDescriptor(bool bUpright)
       ix = i + 5;
       jx = j + 5;
 
-      if (bUpright)
-      {
-        
-      }
-      else
-      {
-        xs = fRound(x + ( -jx*scale*si + ix*scale*co));
-        ys = fRound(y + ( jx*scale*co + ix*scale*si));
-      }
+      xs = fRound(x + ( -jx*scale*si + ix*scale*co));
+      ys = fRound(y + ( jx*scale*co + ix*scale*si));
 
       for (int k = i; k < i + 9; ++k) 
       {
@@ -228,20 +223,12 @@ void Surf::getDescriptor(bool bUpright)
 
           //Get the gaussian weighted x and y responses
           gauss_s1 = gaussian(xs-sample_x,ys-sample_y,2.5f*scale);
-
           rx = haarX(sample_y, sample_x, 2*fRound(scale));
           ry = haarY(sample_y, sample_x, 2*fRound(scale));
 
-          if (bUpright) //Get the gaussian weighted responses
-          {
-            rrx = gauss_s1*rx;
-            rry = gauss_s1*ry;
-          }
-          else  //Get the gaussian weighted responses on rotated axis
-          {
-            rrx = gauss_s1 * (-rx*si + ry*co);
-            rry = gauss_s1 * ( rx*co + ry*si);
-          }
+          //Get the gaussian weighted x and y responses on rotated axis
+          rrx = gauss_s1*(-rx*si + ry*co);
+          rry = gauss_s1*(rx*co + ry*si);
 
           dx += rrx;
           dy += rry;
@@ -259,7 +246,6 @@ void Surf::getDescriptor(bool bUpright)
       desc[count++] = mdx*gauss_s2;
       desc[count++] = mdy*gauss_s2;
 
-      //Accumulate length for vector normalisation
       len += (dx*dx + dy*dy + mdx*mdx + mdy*mdy) * gauss_s2*gauss_s2;
 
       j += 9;
@@ -273,6 +259,7 @@ void Surf::getDescriptor(bool bUpright)
     desc[i] /= len;
 
 }
+
 
 //-------------------------------------------------------
 
