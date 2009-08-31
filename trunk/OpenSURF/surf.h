@@ -25,7 +25,7 @@ class Surf {
     Surf(IplImage *img, std::vector<Ipoint> &ipts);
 
     //! Describe all features in the supplied vector
-    void getDescriptors(bool upright);
+    void getDescriptors(bool bUpright = false);
   
   private:
     
@@ -35,10 +35,7 @@ class Surf {
     void getOrientation();
     
     //! Get the descriptor. See Agrawal ECCV 08
-    void getDescriptor();
-
-    //! Get the upright descriptor vector of the current Ipoint
-    void getUprightDescriptor();
+    void getDescriptor(bool bUpright = false);
 
     //! Calculate the value of the 2d gaussian at x,y
     inline float gaussian(int x, int y, float sig);

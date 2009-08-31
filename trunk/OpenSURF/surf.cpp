@@ -54,7 +54,7 @@ Surf::Surf(IplImage *img, IpVec &ipts)
 //-------------------------------------------------------
 
 //! Describe all features in the supplied vector
-void Surf::getDescriptors(bool upright)
+void Surf::getDescriptors(bool bUpright)
 {
   // Check there are Ipoints to be described
   if (!ipts.size()) return;
@@ -62,7 +62,7 @@ void Surf::getDescriptors(bool upright)
   // Get the size of the vector for fixed loop bounds
   int ipts_size = (int)ipts.size();
 
-  if (upright)
+  if (bUpright)
   {
     // U-SURF loop just gets descriptors
     for (int i = 0; i < ipts_size; ++i)
@@ -71,7 +71,7 @@ void Surf::getDescriptors(bool upright)
       index = i;
 
       // Extract upright (i.e. not rotation invariant) descriptors
-      getUprightDescriptor();
+      getDescriptor(true);
     }
   }
   else
@@ -84,7 +84,7 @@ void Surf::getDescriptors(bool upright)
 
       // Assign Orientations and extract rotation invariant descriptors
       getOrientation();
-      getDescriptor();
+      getDescriptor(false);
     }
   }
 }
@@ -163,7 +163,7 @@ void Surf::getOrientation()
 
 //! Get the modified descriptor. See Agrawal ECCV 08
 //! Modified descriptor contributed by Pablo Fernandez
-void Surf::getDescriptor()
+void Surf::getDescriptor(bool bUpright)
 {
   int y, x, sample_x, sample_y, count=0;
   int i = 0, ix = 0, j = 0, jx = 0, xs = 0, ys = 0;
@@ -176,9 +176,14 @@ void Surf::getDescriptor()
   scale = ipt->scale;
   x = fRound(ipt->x);
   y = fRound(ipt->y);  
-  co = cos(ipt->orientation);
-  si = sin(ipt->orientation);
   desc = ipt->descriptor;
+
+  // If we're not in upright mode calculate sin/cos angle
+  if (!bUpright)
+  {
+    co = cos(ipt->orientation);
+    si = sin(ipt->orientation);
+  }
 
   i = -8;
 
@@ -203,8 +208,15 @@ void Surf::getDescriptor()
       ix = i + 5;
       jx = j + 5;
 
-      xs = fRound(x + ( -jx*scale*si + ix*scale*co));
-      ys = fRound(y + ( jx*scale*co + ix*scale*si));
+      if (bUpright)
+      {
+        
+      }
+      else
+      {
+        xs = fRound(x + ( -jx*scale*si + ix*scale*co));
+        ys = fRound(y + ( jx*scale*co + ix*scale*si));
+      }
 
       for (int k = i; k < i + 9; ++k) 
       {
@@ -220,12 +232,16 @@ void Surf::getDescriptor()
           rx = haarX(sample_y, sample_x, 2*fRound(scale));
           ry = haarY(sample_y, sample_x, 2*fRound(scale));
 
-          //Get the gaussian weighted x and y responses on rotated axis
-          rrx = -rx*si + ry*co;
-          rry = rx*co + ry*si;
-
-          rrx = gauss_s1*rrx;
-          rry = gauss_s1*rry;
+          if (bUpright) //Get the gaussian weighted responses
+          {
+            rrx = gauss_s1*rx;
+            rry = gauss_s1*ry;
+          }
+          else  //Get the gaussian weighted responses on rotated axis
+          {
+            rrx = gauss_s1 * (-rx*si + ry*co);
+            rry = gauss_s1 * ( rx*co + ry*si);
+          }
 
           dx += rrx;
           dy += rry;
@@ -243,6 +259,7 @@ void Surf::getDescriptor()
       desc[count++] = mdx*gauss_s2;
       desc[count++] = mdy*gauss_s2;
 
+      //Accumulate length for vector normalisation
       len += (dx*dx + dy*dy + mdx*mdx + mdy*mdy) * gauss_s2*gauss_s2;
 
       j += 9;
@@ -251,62 +268,6 @@ void Surf::getDescriptor()
   }
 
   //Convert to Unit Vector
-  len = sqrt(len);
-  for(int i = 0; i < 64; ++i)
-    desc[i] /= len;
-
-}
-
-
-//-------------------------------------------------------
-
-//! Get the upright descriptor vector of the provided Ipoint
-void Surf::getUprightDescriptor()
-{
-  int y, x, count=0;
-  float scale, *desc, dx, dy, mdx, mdy;
-  float gauss, rx, ry, len = 0.f;
-
-  Ipoint *ipt = &ipts.at(index);
-  scale = ipt->scale;
-  y = fRound(ipt->y);  
-  x = fRound(ipt->x);
-  desc = ipt->descriptor;
-
-  // Calculate descriptor for this interest point
-  for (int i = -10; i < 10; i+=5)
-  {
-    for (int j = -10; j < 10; j+=5) 
-    {
-      dx=dy=mdx=mdy=0.f;
-      for (int k = i; k < i + 5; ++k) 
-      {
-        for (int l = j; l < j + 5; ++l) 
-        {
-          // get Gaussian weighted x and y responses
-          gauss = static_cast<float>(gauss33[abs(k)][abs(l)]);
-          rx = gauss * haarX(fRound(k*scale+y), fRound(l*scale+x), 2*fRound(scale));
-          ry = gauss * haarY(fRound(k*scale+y), fRound(l*scale+x), 2*fRound(scale));
-
-          dx += rx;
-          dy += ry;
-          mdx += fabs(rx);
-          mdy += fabs(ry);
-        }
-      }
-
-      // add the values to the descriptor vector
-      desc[count++] = dx;
-      desc[count++] = dy;
-      desc[count++] = mdx;
-      desc[count++] = mdy;
-
-      // store the current length^2 of the vector
-      len += dx*dx + dy*dy + mdx*mdx + mdy*mdy;
-    }
-  }
-
-  // convert to unit vector
   len = sqrt(len);
   for(int i = 0; i < 64; ++i)
     desc[i] /= len;
