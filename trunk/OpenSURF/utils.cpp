@@ -94,7 +94,7 @@ void drawIpoints(IplImage *img, vector<Ipoint> &ipts, int tailSize)
   for(unsigned int i = 0; i < ipts.size(); i++) 
   {
     ipt = &ipts.at(i);
-    s = ((9.0f/1.2f) * ipt->scale) / 3.0f;
+    s = (2.5f * ipt->scale);
     o = ipt->orientation;
     lap = ipt->laplacian;
     r1 = fRound(ipt->y);
@@ -134,7 +134,7 @@ void drawIpoint(IplImage *img, Ipoint &ipt, int tailSize)
   float s, o;
   int r1, c1, r2, c2, lap;
 
-  s = ((9.0f/1.2f) * ipt.scale) / 3.0f;
+  s = (2.5f * ipt.scale);
   o = ipt.orientation;
   lap = ipt.laplacian;
   r1 = fRound(ipt.y);
