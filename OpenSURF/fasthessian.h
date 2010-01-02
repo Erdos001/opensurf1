@@ -16,6 +16,7 @@
 
 #include <vector>
 
+class ResponseLayer;
 static const int OCTAVES = 4;
 static const int INTERVALS = 4;
 static const float THRES = 0.0004f;
@@ -25,10 +26,7 @@ static const int INIT_SAMPLE = 2;
 class FastHessian {
   
   public:
-    
-    //! Destructor
-    ~FastHessian();
-
+   
     //! Constructor without image
     FastHessian(std::vector<Ipoint> &ipts, 
                 const int octaves = OCTAVES, 
@@ -60,8 +58,11 @@ class FastHessian {
 
     //---------------- Private Functions -----------------//
 
-    //! Calculate determinant of hessian responses
-    void buildDet();
+    //! Build map of DoH responses
+    void buildResponseMap();
+
+    //! Calculate DoH responses for supplied layer
+    void buildResponseLayer(ResponseLayer *r);
 
     //! Non Maximal Suppression function
     int isExtremum(int octave, int interval, int column, int row);    
@@ -87,6 +88,9 @@ class FastHessian {
     //! Reference to vector of features passed from outside 
     std::vector<Ipoint> &ipts;
 
+    //! Response stack of determinant of hessian values
+    std::vector<ResponseLayer *> responseMap;
+
     //! Number of Octaves
     int octaves;
 
@@ -98,10 +102,6 @@ class FastHessian {
 
     //! Threshold value for blob resonses
     float thres;
-
-    //! Array stack of determinant of hessian values
-    float *m_det;
-
 };
 
 

@@ -20,20 +20,38 @@
 using namespace std;
 
 //-------------------------------------------------------
-// pre calculated lobe sizes
-static const int lobe_cache [] = {3,5,7,9,5,9,13,17,9,17,25,33,17,33,49,65};
-static const int lobe_cache_unique [] = {3,5,7,9,13,17,25,33,49,65};
-static const int lobe_map [] = {0,1,2,3,1,3,4,5,3,5,6,7,5,7,8,9};
-static const int border_cache [] = {14,26,50,98}; 
+
+class ResponseLayer
+{
+public:
+
+  ResponseLayer(int width, int height, int filter)
+  {
+    assert(width > 0 && height > 0);
+    
+    this->width = width;
+    this->height = height;
+    this->filter = filter;
+    responses = new float[width*height];
+    laplacian = new unsigned char[width*height];
+  }
+
+  ~ResponseLayer()
+  {
+    if (responses) delete [] responses;
+    if (laplacian) delete [] laplacian;
+  }
+
+  int width, height, filter;
+  float *responses;
+  unsigned char *laplacian;
+
+};
 
 //-------------------------------------------------------
-
-//! Destructor
-FastHessian::~FastHessian() 
-{
-  // free the det array
-  if (m_det) delete [] m_det;
-}
+// pre calculated lobe sizes
+static const int lobe_cache [] = {3,5,7,9,13,17,25,33,49,65};
+static const int lobe_map [] = {0,1,2,3, 1,3,4,5, 3,5,6,7, 5,7,8,9};
 
 //-------------------------------------------------------
 
@@ -41,7 +59,7 @@ FastHessian::~FastHessian()
 FastHessian::FastHessian(std::vector<Ipoint> &ipts, 
                          const int octaves, const int intervals, const int init_sample, 
                          const float thres) 
-                         : ipts(ipts), m_det(NULL), i_width(0), i_height(0)
+                         : ipts(ipts), i_width(0), i_height(0)
 {
   // Save parameter set
   saveParameters(octaves, intervals, init_sample, thres);
@@ -53,7 +71,7 @@ FastHessian::FastHessian(std::vector<Ipoint> &ipts,
 FastHessian::FastHessian(IplImage *img, std::vector<Ipoint> &ipts, 
                          const int octaves, const int intervals, const int init_sample, 
                          const float thres) 
-                         : ipts(ipts), m_det(NULL), i_width(0), i_height(0)
+                         : ipts(ipts), i_width(0), i_height(0)
 {
   // Save parameter set
   saveParameters(octaves, intervals, init_sample, thres);
@@ -87,18 +105,8 @@ void FastHessian::setIntImage(IplImage *img)
   // Change the source image
   this->img = img;
 
-  // Redefine width, height and det map only if image has changed size
-  if (img->width != i_width || img->height != i_height) 
-  {
-    i_width = img->width;
-    i_height = img->height;
-
-    // Allocate space for determinant of hessian pyramid 
-    if (m_det) delete [] m_det;
-    const int m_det_size = octaves*intervals*i_width*i_height;
-    m_det = new float [m_det_size];
-    memset(m_det,0,m_det_size*sizeof(float));
-  }
+  i_height = img->height;
+  i_width = img->width;
 }
 
 //-------------------------------------------------------
@@ -108,10 +116,17 @@ void FastHessian::getIpoints()
 {
   // Clear the vector of exisiting ipts
   ipts.clear();
+  
+  // Get the response layers
+  ResponseLayer *bottom, *middle, *top;
+  //bottom = &...
+  //middle = &...
+  //top    = &...
 
-  // Calculate approximated determinant of hessian values
-  buildDet();
 
+
+
+  /*
   for(int o=0; o < octaves; o++) 
   {
     // For each octave double the sampling step of the previous
@@ -154,60 +169,81 @@ void FastHessian::getIpoints()
       }
     }  
   }
+  */
 }
 
 //-------------------------------------------------------
 
-//! Calculate determinant of hessian responses
-void FastHessian::buildDet()
+//! Build map of DoH responses
+void FastHessian::buildResponseMap()
 {
-  int l, w, b, border, step;
-  float Dxx, Dyy, Dxy, inverse_area;
+  // clear any existing response layers
+  responseMap.clear();
 
-  for(int o=0; o<octaves; o++) 
+  // Get image attributes
+  int w = img->width / init_sample;
+  int h = img->height / init_sample;
+
+  // Calculate approximated determinant of hessian values
+  responseMap.push_back(new ResponseLayer(w,   h,    9));
+  responseMap.push_back(new ResponseLayer(w,   h,   15));
+  responseMap.push_back(new ResponseLayer(w,   h,   21));
+  responseMap.push_back(new ResponseLayer(w,   h,   27));
+
+  responseMap.push_back(new ResponseLayer(w/2, h/2, 39));
+  responseMap.push_back(new ResponseLayer(w/2, h/2, 51));
+
+  responseMap.push_back(new ResponseLayer(w/4, h/4, 75));
+  responseMap.push_back(new ResponseLayer(w/4, h/4, 99));
+  
+  responseMap.push_back(new ResponseLayer(w/8, h/8, 147));
+  responseMap.push_back(new ResponseLayer(w/8, h/8, 195));
+  
+  for (unsigned int i = 0; i < responseMap.size(); ++i)
   {
-    step = init_sample * fRound(pow(2.0f,o));
-    border = border_cache[o];
+    buildResponseLayer(responseMap[i]);
+  }
+}
 
-    for(int i=0; i<intervals; i++) {
+//-------------------------------------------------------
 
-      l = lobe_cache[o*intervals + i]; 
-      w = 3 * l;                      
-      b = w / 2;        
-      inverse_area = 1.0f/(w * w);     
+//! Calculate DoH responses for supplied layer
+void FastHessian::buildResponseLayer(ResponseLayer *r)
+{
+  float *responses = r->responses;  // response storage
+  unsigned char *laplacian = r->laplacian; // laplacian sign storage
+  int step = i_height / r->height;  // step size for this filter
+  int b = (r->filter - 1) / 2 + 1;  // border for this filter
+  int l = r->filter / 3;            // lobe for this filter (filter size / 3)
+  int w = r->filter;                // filter size
+  float inverse_area = 1.f/(w*w);   // normalisation factor
+  float Dxx, Dyy, Dxy;
 
-      for(int r = border; r < i_height - border; r += step) 
-      {
-        for(int c = border; c < i_width - border; c += step) 
-        {
-          Dxx = BoxIntegral(img, r - l + 1, c - b, 2*l - 1, w)
-            - BoxIntegral(img, r - l + 1, c - l / 2, 2*l - 1, l)*3;
-          Dyy = BoxIntegral(img, r - b, c - l + 1, w, 2*l - 1)
-            - BoxIntegral(img, r - l / 2, c - l + 1, l, 2*l - 1)*3;
-          Dxy = + BoxIntegral(img, r - l, c + 1, l, l)
+  for(int r = b, index = 0; r < i_height - b; r += step) 
+  {
+    for(int c = b; c < i_width - b; c += step, ++index) 
+    {
+      Dxx = BoxIntegral(img, r - l + 1, c - b, 2*l - 1, w)
+          - BoxIntegral(img, r - l + 1, c - l / 2, 2*l - 1, l)*3;
+      Dyy = BoxIntegral(img, r - b, c - l + 1, w, 2*l - 1)
+          - BoxIntegral(img, r - l / 2, c - l + 1, l, 2*l - 1)*3;
+      Dxy = + BoxIntegral(img, r - l, c + 1, l, l)
             + BoxIntegral(img, r + 1, c - l, l, l)
             - BoxIntegral(img, r - l, c - l, l, l)
             - BoxIntegral(img, r + 1, c + 1, l, l);
 
-          // Normalise the filter responses with respect to their size
-          Dxx *= inverse_area;
-          Dyy *= inverse_area;
-          Dxy *= inverse_area;
+      // Normalise the filter responses with respect to their size
+      Dxx *= inverse_area;
+      Dyy *= inverse_area;
+      Dxy *= inverse_area;
 
-          // Get the sign of the laplacian
-          int lap_sign = (Dxx+Dyy >= 0 ? 1 : -1);
-
-          // Get the determinant of hessian response
-          float determinant = (Dxx*Dyy - 0.81f*Dxy*Dxy);
-
-          m_det[(o*intervals+i)*(i_width*i_height) + (r*i_width+c)] 
-          = (determinant < 0 ? 0 : lap_sign * determinant);
-        }
-      }
+      // Get the determinant of hessian response & laplacian sign
+      responses[index] = (Dxx * Dyy - 0.81f * Dxy * Dxy);
+      laplacian[index] = (Dxx + Dyy >= 0 ? 1 : 0);
     }
   }
-}   
-
+}
+  
 //-------------------------------------------------------
 
 //! Non Maximal Suppression function
@@ -241,7 +277,8 @@ int FastHessian::isExtremum(int octave, int interval, int c, int r)
 //! Return the value of the approximated determinant of hessian
 inline float FastHessian::getVal(int o, int i, int c, int r)
 {
-  return fabs(m_det[(o*intervals+i)*(i_width*i_height) + (r*i_width+c)]);
+  //return fabs(m_det[(o*intervals+i)*(i_width*i_height) + (r*i_width+c)]);
+  return 0;
 }
 
 //-------------------------------------------------------
@@ -249,9 +286,11 @@ inline float FastHessian::getVal(int o, int i, int c, int r)
 //! Return the sign of the laplacian (trace of the hessian)
 inline int FastHessian::getLaplacian(int o, int i, int c, int r)
 {
-  float res = (m_det[(o*intervals+i)*(i_width*i_height) + (r*i_width+c)]);
+  //float res = (m_det[(o*intervals+i)*(i_width*i_height) + (r*i_width+c)]);
 
-  return (res >= 0 ? 1 : -1);
+  //return (res >= 0 ? 1 : -1);
+
+  return 0;
 }
 
 //-------------------------------------------------------
