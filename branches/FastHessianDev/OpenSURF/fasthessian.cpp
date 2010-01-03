@@ -17,6 +17,8 @@
 
 #include "fasthessian.h"
 
+#define FH_DEBUG
+
 using namespace std;
 
 //-------------------------------------------------------
@@ -25,15 +27,24 @@ class ResponseLayer
 {
 public:
 
-  ResponseLayer(int width, int height, int filter)
+  int width, height, step, filter;
+  float *responses;
+  unsigned char *laplacian;
+
+  ResponseLayer(int width, int height, int step, int filter)
   {
     assert(width > 0 && height > 0);
     
     this->width = width;
     this->height = height;
+    this->step = step;
     this->filter = filter;
+
     responses = new float[width*height];
     laplacian = new unsigned char[width*height];
+
+    memset(responses,0,sizeof(float)*width*height);
+    memset(laplacian,0,sizeof(unsigned char)*width*height);
   }
 
   ~ResponseLayer()
@@ -42,10 +53,24 @@ public:
     if (laplacian) delete [] laplacian;
   }
 
-  int width, height, filter;
-  float *responses;
-  unsigned char *laplacian;
+  inline unsigned char getLaplacian(unsigned int row, unsigned int column)
+  {
+    return laplacian[row * width + column];
+  }
 
+  inline float getResponse(unsigned int row, unsigned int column)
+  {
+    return responses[row * width + column];
+  }
+
+#ifdef FH_DEBUG
+  std::vector<std::pair<int, int>> coords;
+
+  inline std::pair<int,int> getCoords(unsigned int row, unsigned int column)
+  {
+    return coords[row * width + column];
+  }
+#endif
 };
 
 //-------------------------------------------------------
@@ -58,11 +83,11 @@ static const int lobe_map [] = {0,1,2,3, 1,3,4,5, 3,5,6,7, 5,7,8,9};
 //! Constructor without image
 FastHessian::FastHessian(std::vector<Ipoint> &ipts, 
                          const int octaves, const int intervals, const int init_sample, 
-                         const float thres) 
+                         const float thresh) 
                          : ipts(ipts), i_width(0), i_height(0)
 {
   // Save parameter set
-  saveParameters(octaves, intervals, init_sample, thres);
+  saveParameters(octaves, intervals, init_sample, thresh);
 }
 
 //-------------------------------------------------------
@@ -70,11 +95,11 @@ FastHessian::FastHessian(std::vector<Ipoint> &ipts,
 //! Constructor with image
 FastHessian::FastHessian(IplImage *img, std::vector<Ipoint> &ipts, 
                          const int octaves, const int intervals, const int init_sample, 
-                         const float thres) 
+                         const float thresh) 
                          : ipts(ipts), i_width(0), i_height(0)
 {
   // Save parameter set
-  saveParameters(octaves, intervals, init_sample, thres);
+  saveParameters(octaves, intervals, init_sample, thresh);
 
   // Set the current image
   setIntImage(img);
@@ -82,9 +107,19 @@ FastHessian::FastHessian(IplImage *img, std::vector<Ipoint> &ipts,
 
 //-------------------------------------------------------
 
+FastHessian::~FastHessian()
+{
+  for (unsigned int i = 0; i < responseMap.size(); ++i)
+  {
+    if (responseMap[i]) free(responseMap[i]);
+  }
+}
+
+//-------------------------------------------------------
+
 //! Save the parameters
 void FastHessian::saveParameters(const int octaves, const int intervals, 
-                                 const int init_sample, const float thres)
+                                 const int init_sample, const float thresh)
 {
   // Initialise variables with bounds-checked values
   this->octaves = 
@@ -93,7 +128,7 @@ void FastHessian::saveParameters(const int octaves, const int intervals,
     (intervals > 0 && intervals <= 4 ? intervals : INTERVALS);
   this->init_sample = 
     (init_sample > 0 && init_sample <= 6 ? init_sample : INIT_SAMPLE);
-  this->thres = (thres >= 0 ? thres : THRES);
+  this->thresh = (thresh >= 0 ? thresh : THRES);
 }
 
 
@@ -116,60 +151,33 @@ void FastHessian::getIpoints()
 {
   // Clear the vector of exisiting ipts
   ipts.clear();
-  
+
+  // Build the response map
+  buildResponseMap();
+
   // Get the response layers
   ResponseLayer *bottom, *middle, *top;
-  //bottom = &...
-  //middle = &...
-  //top    = &...
+  bottom = responseMap.at(0);
+  middle = responseMap.at(1);
+  top    = responseMap.at(2);
 
-
-
-
-  /*
-  for(int o=0; o < octaves; o++) 
+  // loop over middle response layer at density of the most 
+  // sparse layer (always top), to find maxima across scale and space
+  for (int r = 0; r < top->height; ++r)
   {
-    // For each octave double the sampling step of the previous
-    int step = init_sample * fRound(pow(2.0f,o));
-    int border = border_cache[o];
-
-    // 3x3x3 non-max suppression over whole image
-    for ( int i = 1; i < intervals-1; i += 2) {
-      for ( int r = border + step; r < i_height - border - step; r += 2*step ) {
-        for ( int c = border + step; c < i_width - border - step; c += 2*step ) {
-
-          int i_max = -1, r_max = -1, c_max = -1;
-          float max_val = 0;
-
-          // Scan the pixels in this block to find the local extremum.
-          for (int ii = i; ii < min(i+2, intervals-1); ii += 1) {
-            for (int rr = r; rr < min(r+2*step, i_height - border - step); rr += step) {
-              for (int cc = c; cc < min(c+2*step, i_width - border - step); cc += step) {
-
-                float val = getVal(o, ii, cc, rr);
-
-                // record the max value and its location
-                if (val > max_val) 
-                {
-                  max_val = val;
-                  i_max = ii;
-                  r_max = rr;
-                  c_max = cc;
-                }
-              }
-            }
-          }
-
-          // Check the block extremum is an extremum across boundaries.
-          if (max_val > thres && i_max != -1 && isExtremum(o, i_max, c_max, r_max)) 
-          {
-            interpolateExtremum(o, i_max, r_max, c_max);
-          }
-        }
+    for (int c = 0; c < top->width; ++c)
+    {
+      if (middle->getResponse(r,c) > thresh && isExtremum(r,c,top,middle,bottom))
+      {
+        Ipoint ipt;
+        ipt.x = static_cast<float>(c * top->step);
+        ipt.y = static_cast<float>(r * top->step);
+        ipt.scale = static_cast<float>((0.1333f) * middle->filter);
+        ipt.laplacian = static_cast<int>(middle->getLaplacian(r,c));
+        ipts.push_back(ipt);
       }
-    }  
+    }
   }
-  */
 }
 
 //-------------------------------------------------------
@@ -181,23 +189,26 @@ void FastHessian::buildResponseMap()
   responseMap.clear();
 
   // Get image attributes
-  int w = img->width / init_sample;
-  int h = img->height / init_sample;
+  int w = (i_width / init_sample);
+  int h = (i_height / init_sample);
+  int s = (init_sample);
+
+  // Octave 1: 9,  15, 21, 27
+  // Octave 2: 15, 27, 39, 51
+  // Octave 3: 27, 51, 75, 99
+  // Octave 4: 51, 99, 147,195
 
   // Calculate approximated determinant of hessian values
-  responseMap.push_back(new ResponseLayer(w,   h,    9));
-  responseMap.push_back(new ResponseLayer(w,   h,   15));
-  responseMap.push_back(new ResponseLayer(w,   h,   21));
-  responseMap.push_back(new ResponseLayer(w,   h,   27));
-
-  responseMap.push_back(new ResponseLayer(w/2, h/2, 39));
-  responseMap.push_back(new ResponseLayer(w/2, h/2, 51));
-
-  responseMap.push_back(new ResponseLayer(w/4, h/4, 75));
-  responseMap.push_back(new ResponseLayer(w/4, h/4, 99));
-  
-  responseMap.push_back(new ResponseLayer(w/8, h/8, 147));
-  responseMap.push_back(new ResponseLayer(w/8, h/8, 195));
+  //responseMap.push_back(new ResponseLayer(w,   h,   s,   9));
+  //responseMap.push_back(new ResponseLayer(w,   h,   s,   15));
+  //responseMap.push_back(new ResponseLayer(w,   h,   s,   21));
+  responseMap.push_back(new ResponseLayer(w,   h,   s,   27));
+  //responseMap.push_back(new ResponseLayer(w/2, h/2, s*2, 39));
+  responseMap.push_back(new ResponseLayer(w/2, h/2, s*2, 51));
+  responseMap.push_back(new ResponseLayer(w/4, h/4, s*4, 75));
+  //responseMap.push_back(new ResponseLayer(w/4, h/4, s*4, 99));
+  //responseMap.push_back(new ResponseLayer(w/8, h/8, s*8, 147));
+  //responseMap.push_back(new ResponseLayer(w/8, h/8, s*8, 195));
   
   for (unsigned int i = 0; i < responseMap.size(); ++i)
   {
@@ -208,20 +219,20 @@ void FastHessian::buildResponseMap()
 //-------------------------------------------------------
 
 //! Calculate DoH responses for supplied layer
-void FastHessian::buildResponseLayer(ResponseLayer *r)
+void FastHessian::buildResponseLayer(ResponseLayer *rl)
 {
-  float *responses = r->responses;  // response storage
-  unsigned char *laplacian = r->laplacian; // laplacian sign storage
-  int step = i_height / r->height;  // step size for this filter
-  int b = (r->filter - 1) / 2 + 1;  // border for this filter
-  int l = r->filter / 3;            // lobe for this filter (filter size / 3)
-  int w = r->filter;                // filter size
-  float inverse_area = 1.f/(w*w);   // normalisation factor
+  float *responses = rl->responses;         // response storage
+  unsigned char *laplacian = rl->laplacian; // laplacian sign storage
+  int step = rl->step;                      // step size for this filter
+  int b = (rl->filter - 1) / 2 + 1;         // border for this filter
+  int l = rl->filter / 3;                   // lobe for this filter (filter size / 3)
+  int w = rl->filter;                       // filter size
+  float inverse_area = 1.f/(w*w);           // normalisation factor
   float Dxx, Dyy, Dxy;
 
-  for(int r = b, index = 0; r < i_height - b; r += step) 
+  for(int r = 0, index = 0; r < i_height - (i_height % step); r += step) 
   {
-    for(int c = b; c < i_width - b; c += step, ++index) 
+    for(int c = 0; c < i_width - (i_width % step); c += step, index++) 
     {
       Dxx = BoxIntegral(img, r - l + 1, c - b, 2*l - 1, w)
           - BoxIntegral(img, r - l + 1, c - l / 2, 2*l - 1, l)*3;
@@ -236,10 +247,18 @@ void FastHessian::buildResponseLayer(ResponseLayer *r)
       Dxx *= inverse_area;
       Dyy *= inverse_area;
       Dxy *= inverse_area;
-
+     
       // Get the determinant of hessian response & laplacian sign
       responses[index] = (Dxx * Dyy - 0.81f * Dxy * Dxy);
       laplacian[index] = (Dxx + Dyy >= 0 ? 1 : 0);
+
+#ifdef FH_DEBUG
+      // check index doesn't exceed bound
+      assert(index < rl->width * rl->height);
+
+      // create list of the image coords for each response
+      rl->coords.push_back(std::make_pair<int,int>(r,c));
+#endif
     }
   }
 }
@@ -247,66 +266,53 @@ void FastHessian::buildResponseLayer(ResponseLayer *r)
 //-------------------------------------------------------
 
 //! Non Maximal Suppression function
-int FastHessian::isExtremum(int octave, int interval, int c, int r)
+int FastHessian::isExtremum(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b)
 {
-  int step = init_sample * fRound(pow(2.0f,octave));
-
-  // Bounds check
-  if (interval - 1 < 0 || interval + 1 > intervals - 1 
-    || c - step < 0 || c + step > i_width 
-    || r - step < 0 || r + step > i_height)
-  {
+  // bounds check
+  if (r-1 < 0 || r+1 > t->height || c-1 < 0 || c+1 > t->width)
     return 0;
+
+  float candidate = m->getResponse(r, c);
+  int scaleT2M = m->width / t->width;
+  int scaleT2B = b->width / t->width;
+
+  for (int rr = -1; rr <=1; ++rr)
+  {
+    for (int cc = -1; cc <=1; ++cc)
+    {
+#ifdef FH_DEBUG
+      // check the responses are being compared from the correct image coords
+      std::pair<int,int> tc = t->getCoords(r+rr, c+cc);
+      std::pair<int,int> mc = m->getCoords(scaleT2M*(r+rr), scaleT2M*(c+cc));
+      std::pair<int,int> bc = b->getCoords(scaleT2B*(r+rr), scaleT2B*(c+cc));
+      assert (tc == mc && mc == bc);
+#endif
+
+      // if any response in 3x3x3 is greater candidate not maximum
+      if (
+        t->getResponse(r+rr, c+cc) > candidate ||
+        m->getResponse(scaleT2M*(r+rr), scaleT2M*(c+cc)) > candidate ||
+        b->getResponse(scaleT2B*(r+rr), scaleT2B*(c+cc)) > candidate
+        ) 
+        return 0;
+    }
   }
-
-  float val = getVal(octave,interval, c, r);
-
-  // Check for maximum 
-  for(int ii = interval-1; ii <= interval+1; ++ii )
-    for(int cc = c - step; cc <= c + step; cc+=step )
-      for(int rr = r - step; rr <= r + step; rr+=step ) 
-        if (ii != 0 || cc != 0 || rr != 0)
-          if(getVal(octave, ii, cc, rr) > val)
-            return 0;
 
   return 1;
 }
 
 //-------------------------------------------------------
-
-//! Return the value of the approximated determinant of hessian
-inline float FastHessian::getVal(int o, int i, int c, int r)
-{
-  //return fabs(m_det[(o*intervals+i)*(i_width*i_height) + (r*i_width+c)]);
-  return 0;
-}
-
-//-------------------------------------------------------
-
-//! Return the sign of the laplacian (trace of the hessian)
-inline int FastHessian::getLaplacian(int o, int i, int c, int r)
-{
-  //float res = (m_det[(o*intervals+i)*(i_width*i_height) + (r*i_width+c)]);
-
-  //return (res >= 0 ? 1 : -1);
-
-  return 0;
-}
-
-//-------------------------------------------------------
-
-//! Interpolates a scale-space extremum's location and scale to subpixel
-//! accuracy to form an image feature.   
-void FastHessian::interpolateExtremum(int octv, int intvl, int r, int c)
+/*
+//! Interpolate scale-space extrema to subpixel accuracy to form an image feature.   
+void FastHessian::interpolateExtremum(int r, int c)
 {
   double xi = 0, xr = 0, xc = 0;
-  int step = init_sample * fRound(pow(2.0f,octv));
 
   // Get the offsets to the actual location of the extremum
   interpolateStep( octv, intvl, r, c, &xi, &xr, &xc );
 
   // If point is sufficiently close to the actual extremum
-  if( fabs( xi ) < 0.5  &&  fabs( xr ) < 0.5  &&  fabs( xc ) < 0.5 )
+  if( fabs( xi ) < 0.5f  &&  fabs( xr ) < 0.5f  &&  fabs( xc ) < 0.5f )
   {
     // Create Ipoint and push onto Ipoints vector
     Ipoint ipt;
@@ -408,5 +414,5 @@ CvMat* FastHessian::hessian3D(int octv, int intvl, int r, int c )
 
   return H;
 }
-
+*/
 //-------------------------------------------------------

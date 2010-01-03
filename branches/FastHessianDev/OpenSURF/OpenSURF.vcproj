@@ -223,10 +223,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\response.h"
-				>
-			</File>
-			<File
 				RelativePath=".\surf.h"
 				>
 			</File>

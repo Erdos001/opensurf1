@@ -107,8 +107,8 @@ void drawIpoints(IplImage *img, vector<Ipoint> &ipts, int tailSize)
     else  // Green dot if using upright version
       cvCircle(img, cvPoint(c1,r1), 1, cvScalar(0, 255, 0),-1);
 
-    if (lap >= 0)
-    { // Blue circles indicate light blobs on dark backgrounds
+    if (lap > 0)
+    { // Blue circles indicate dark blobs on light backgrounds
       cvCircle(img, cvPoint(c1,r1), fRound(s), cvScalar(255, 0, 0),1);
     }
     else

@@ -42,6 +42,9 @@ class FastHessian {
                 const int init_sample = INIT_SAMPLE, 
                 const float thres = THRES);
 
+    //! Destructor
+    ~FastHessian();
+
     //! Save the parameters
     void saveParameters(const int octaves, 
                         const int intervals,
@@ -64,15 +67,9 @@ class FastHessian {
     //! Calculate DoH responses for supplied layer
     void buildResponseLayer(ResponseLayer *r);
 
-    //! Non Maximal Suppression function
-    int isExtremum(int octave, int interval, int column, int row);    
+    //! 3x3x3 Extrema test
+    int isExtremum(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b);    
     
-    //! Return the value of the approximated determinant of hessian
-    inline float getVal(int octave, int interval, int column, int row);
-
-    //! Return the sign of the laplacian (trace of the hessian)
-    inline int getLaplacian(int o, int i, int c, int r);
-
     //! Interpolation functions - adapted from Lowe's SIFT implementation
     void interpolateExtremum(int octv, int intvl, int r, int c);
     void interpolateStep( int octv, int intvl, int r, int c, double* xi, double* xr, double* xc );
@@ -101,7 +98,7 @@ class FastHessian {
     int init_sample;
 
     //! Threshold value for blob resonses
-    float thres;
+    float thresh;
 };
 
 
