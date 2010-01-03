@@ -54,7 +54,7 @@ int mainImage(void)
 {
   // Declare Ipoints and other stuff
   IpVec ipts;
-  IplImage *img=cvLoadImage("Images/img1.jpg");
+  IplImage *img=cvLoadImage("Images/sf.jpg");
 
   clock_t start = clock();
   // Detect and describe interest points in the image

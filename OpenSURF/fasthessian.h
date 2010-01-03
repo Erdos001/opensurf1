@@ -71,10 +71,11 @@ class FastHessian {
     int isExtremum(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b);    
     
     //! Interpolation functions - adapted from Lowe's SIFT implementation
-    void interpolateExtremum(int octv, int intvl, int r, int c);
-    void interpolateStep( int octv, int intvl, int r, int c, double* xi, double* xr, double* xc );
-    CvMat* deriv3D( int octv, int intvl, int r, int c );
-    CvMat* hessian3D(int octv, int intvl, int r, int c );
+    void interpolateExtremum(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b);
+    void interpolateStep(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b,
+                          double* xi, double* xr, double* xc );
+    CvMat* deriv3D(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b);
+    CvMat* hessian3D(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b);
 
     //---------------- Private Variables -----------------//
 
