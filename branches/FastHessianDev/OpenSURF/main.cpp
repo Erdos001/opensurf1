@@ -58,7 +58,7 @@ int mainImage(void)
 
   clock_t start = clock();
   // Detect and describe interest points in the image
-  surfDetDes(img, ipts, false, 3, 4, 2, 0.0004f); 
+  surfDetDes(img, ipts, false, 4, 4, 2, 0.0001f); 
   clock_t end = clock();
 
   std::cout<< "OpenSURF took: " << end - start << " clocks" << std::endl;
