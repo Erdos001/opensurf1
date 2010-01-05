@@ -15,80 +15,12 @@
 
 #include <vector>
 
+#include "responselayer.h"
 #include "fasthessian.h"
 
-#define FH_DEBUG
+//#define FH_DEBUG
 
 using namespace std;
-
-//-------------------------------------------------------
-
-class ResponseLayer
-{
-public:
-
-  int width, height, step, filter;
-  float *responses;
-  unsigned char *laplacian;
-
-  ResponseLayer(int width, int height, int step, int filter)
-  {
-    assert(width > 0 && height > 0);
-    
-    this->width = width;
-    this->height = height;
-    this->step = step;
-    this->filter = filter;
-
-    responses = new float[width*height];
-    laplacian = new unsigned char[width*height];
-
-    memset(responses,0,sizeof(float)*width*height);
-    memset(laplacian,0,sizeof(unsigned char)*width*height);
-  }
-
-  ~ResponseLayer()
-  {
-    if (responses) delete [] responses;
-    if (laplacian) delete [] laplacian;
-  }
-
-  inline unsigned char getLaplacian(unsigned int row, unsigned int column)
-  {
-    return laplacian[row * width + column];
-  }
-
-  inline float getResponse(unsigned int row, unsigned int column)
-  {
-    return responses[row * width + column];
-  }
-
-  inline float getResponse(unsigned int row, unsigned int column, ResponseLayer *src)
-  {
-    int scale = this->width / src->width;
-
-#ifdef FH_DEBUG
-    assert(src->getCoords(row, column) == this->getCoords(scale * row, scale * column));
-#endif
-
-    return responses[(scale * row) * width + (scale * column)];
-  }
-
-#ifdef FH_DEBUG
-  std::vector<std::pair<int, int>> coords;
-
-  inline std::pair<int,int> getCoords(unsigned int row, unsigned int column)
-  {
-    return coords[row * width + column];
-  }
-
-  inline std::pair<int,int> getCoords(unsigned int row, unsigned int column, ResponseLayer *src)
-  {
-    int scale = this->width / src->width;
-    return coords[(scale * row) * width + (scale * column)];
-  }
-#endif
-};
 
 //-------------------------------------------------------
 
@@ -301,7 +233,8 @@ void FastHessian::buildResponseLayer(ResponseLayer *rl)
 int FastHessian::isExtremum(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b)
 {
   // bounds check
-  if (r-1 < 0 || r+1 >= t->height || c-1 < 0 || c+1 >= t->width)
+  int border = (t->filter + 1) / 2;
+  if (r < border || r > t->height - border || c < border || c > t->width - border)
     return 0;
 
   // check the candidate point in the middle layer is above thresh 
@@ -315,9 +248,9 @@ int FastHessian::isExtremum(int r, int c, ResponseLayer *t, ResponseLayer *m, Re
     {
       // if any response in 3x3x3 is greater candidate not maximum
       if (
-        t->getResponse(r+rr, c+cc) > candidate ||
-        m->getResponse(r+rr, c+cc, t) > candidate ||
-        b->getResponse(r+rr, c+cc, t) > candidate
+        t->getResponse(r+rr, c+cc) >= candidate ||
+        ((rr != 0 && cc != 0) && m->getResponse(r+rr, c+cc, t) >= candidate) ||
+        b->getResponse(r+rr, c+cc, t) >= candidate
         ) 
         return 0;
     }
@@ -331,32 +264,30 @@ int FastHessian::isExtremum(int r, int c, ResponseLayer *t, ResponseLayer *m, Re
 //! Interpolate scale-space extrema to subpixel accuracy to form an image feature.   
 void FastHessian::interpolateExtremum(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b)
 {
+  /*
+  Ipoint ipt;
+  ipt.x = static_cast<float>(c * t->step);
+  ipt.y = static_cast<float>(r * t->step);
+  ipt.scale = static_cast<float>((0.1333f) * m->filter);
+  ipt.laplacian = static_cast<int>(m->getLaplacian(r,c));
+  ipts.push_back(ipt);
+  */
+
+  // Do the interpolation
   double xi = 0, xr = 0, xc = 0;
 
   // Get the offsets to the actual location of the extremum
   interpolateStep(r, c, t, m, b, &xi, &xr, &xc );
 
-  printf("%f, %f, %f, %d\n", xi, xr, xc, m->step);
-
   // If point is sufficiently close to the actual extremum
   //if( fabs( xi ) < 0.5f  &&  fabs( xr ) < 0.5f  &&  fabs( xc ) < 0.5f )
   {
     Ipoint ipt;
-    ipt.x = static_cast<float>(c * t->step);
-    ipt.y = static_cast<float>(r * t->step);
+    ipt.x = static_cast<float>((c + xc) * t->step);
+    ipt.y = static_cast<float>((r + xr) * t->step);
     ipt.scale = static_cast<float>((0.1333f) * m->filter);
     ipt.laplacian = static_cast<int>(m->getLaplacian(r,c));
     ipts.push_back(ipt);
-    
-    /*
-    // Create Ipoint and push onto Ipoints vector
-    Ipoint ipt;
-    ipt.x = static_cast<float>(c + step*xc);
-    ipt.y = static_cast<float>(r + step*xr);
-    ipt.scale = static_cast<float>((1.2f/9.0f) * (3*(pow(2.0f, octv+1) * (intvl+xi+1)+1)));
-    ipt.laplacian = getLaplacian(octv, intvl, c, r);
-    ipts.push_back(ipt);
-    */
   }
 }
 

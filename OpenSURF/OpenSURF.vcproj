@@ -223,6 +223,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\responselayer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\surf.h"
 				>
 			</File>
