@@ -16,6 +16,7 @@
 
 #include <vector>
 
+class ResponseLayer;
 static const int OCTAVES = 4;
 static const int INTERVALS = 4;
 static const float THRES = 0.0004f;
@@ -25,10 +26,7 @@ static const int INIT_SAMPLE = 2;
 class FastHessian {
   
   public:
-    
-    //! Destructor
-    ~FastHessian();
-
+   
     //! Constructor without image
     FastHessian(std::vector<Ipoint> &ipts, 
                 const int octaves = OCTAVES, 
@@ -43,6 +41,9 @@ class FastHessian {
                 const int intervals = INTERVALS, 
                 const int init_sample = INIT_SAMPLE, 
                 const float thres = THRES);
+
+    //! Destructor
+    ~FastHessian();
 
     //! Save the parameters
     void saveParameters(const int octaves, 
@@ -60,23 +61,21 @@ class FastHessian {
 
     //---------------- Private Functions -----------------//
 
-    //! Calculate determinant of hessian responses
-    void buildDet();
+    //! Build map of DoH responses
+    void buildResponseMap();
 
-    //! Non Maximal Suppression function
-    int isExtremum(int octave, int interval, int column, int row);    
+    //! Calculate DoH responses for supplied layer
+    void buildResponseLayer(ResponseLayer *r);
+
+    //! 3x3x3 Extrema test
+    int isExtremum(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b);    
     
-    //! Return the value of the approximated determinant of hessian
-    inline float getVal(int octave, int interval, int column, int row);
-
-    //! Return the sign of the laplacian (trace of the hessian)
-    inline int getLaplacian(int o, int i, int c, int r);
-
     //! Interpolation functions - adapted from Lowe's SIFT implementation
-    void interpolateExtremum(int octv, int intvl, int r, int c);
-    void interpolateStep( int octv, int intvl, int r, int c, double* xi, double* xr, double* xc );
-    CvMat* deriv3D( int octv, int intvl, int r, int c );
-    CvMat* hessian3D(int octv, int intvl, int r, int c );
+    void interpolateExtremum(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b);
+    void interpolateStep(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b,
+                          double* xi, double* xr, double* xc );
+    CvMat* deriv3D(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b);
+    CvMat* hessian3D(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b);
 
     //---------------- Private Variables -----------------//
 
@@ -86,6 +85,9 @@ class FastHessian {
 
     //! Reference to vector of features passed from outside 
     std::vector<Ipoint> &ipts;
+
+    //! Response stack of determinant of hessian values
+    std::vector<ResponseLayer *> responseMap;
 
     //! Number of Octaves
     int octaves;
@@ -97,11 +99,7 @@ class FastHessian {
     int init_sample;
 
     //! Threshold value for blob resonses
-    float thres;
-
-    //! Array stack of determinant of hessian values
-    float *m_det;
-
+    float thresh;
 };
 
 
