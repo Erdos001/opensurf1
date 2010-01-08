@@ -1,4 +1,4 @@
-#define RL_DEBUG  // un-comment to test response layer
+//#define RL_DEBUG  // un-comment to test response layer
 
 class ResponseLayer
 {
