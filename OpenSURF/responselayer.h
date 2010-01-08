@@ -1,3 +1,4 @@
+#define RL_DEBUG  // un-comment to test response layer
 
 class ResponseLayer
 {
@@ -34,6 +35,17 @@ public:
     return laplacian[row * width + column];
   }
 
+  inline unsigned char getLaplacian(unsigned int row, unsigned int column, ResponseLayer *src)
+  {
+    int scale = this->width / src->width;
+
+    #ifdef RL_DEBUG
+    assert(src->getCoords(row, column) == this->getCoords(scale * row, scale * column));
+    #endif
+
+    return laplacian[(scale * row) * width + (scale * column)];
+  }
+
   inline float getResponse(unsigned int row, unsigned int column)
   {
     return responses[row * width + column];
@@ -43,14 +55,14 @@ public:
   {
     int scale = this->width / src->width;
 
-#ifdef FH_DEBUG
+    #ifdef RL_DEBUG
     assert(src->getCoords(row, column) == this->getCoords(scale * row, scale * column));
-#endif
+    #endif
 
     return responses[(scale * row) * width + (scale * column)];
   }
 
-#ifdef FH_DEBUG
+#ifdef RL_DEBUG
   std::vector<std::pair<int, int>> coords;
 
   inline std::pair<int,int> getCoords(unsigned int row, unsigned int column)

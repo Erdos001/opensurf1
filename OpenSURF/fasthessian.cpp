@@ -18,7 +18,7 @@
 #include "responselayer.h"
 #include "fasthessian.h"
 
-//#define FH_DEBUG
+
 
 using namespace std;
 
@@ -219,7 +219,7 @@ void FastHessian::buildResponseLayer(ResponseLayer *rl)
       responses[index] = (Dxx * Dyy - 0.81f * Dxy * Dxy);
       laplacian[index] = (Dxx + Dyy >= 0 ? 1 : 0);
 
-#ifdef FH_DEBUG
+#ifdef RL_DEBUG
       // create list of the image coords for each response
       rl->coords.push_back(std::make_pair<int,int>(r,c));
 #endif
@@ -233,8 +233,8 @@ void FastHessian::buildResponseLayer(ResponseLayer *rl)
 int FastHessian::isExtremum(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b)
 {
   // bounds check
-  int border = (t->filter + 1) / 2;
-  if (r < border || r > t->height - border || c < border || c > t->width - border)
+  int layerBorder = (t->filter + 1) / (2 * t->step);
+  if (r <= layerBorder || r >= t->height - layerBorder || c <= layerBorder || c >= t->width - layerBorder)
     return 0;
 
   // check the candidate point in the middle layer is above thresh 
@@ -264,29 +264,23 @@ int FastHessian::isExtremum(int r, int c, ResponseLayer *t, ResponseLayer *m, Re
 //! Interpolate scale-space extrema to subpixel accuracy to form an image feature.   
 void FastHessian::interpolateExtremum(int r, int c, ResponseLayer *t, ResponseLayer *m, ResponseLayer *b)
 {
-  /*
-  Ipoint ipt;
-  ipt.x = static_cast<float>(c * t->step);
-  ipt.y = static_cast<float>(r * t->step);
-  ipt.scale = static_cast<float>((0.1333f) * m->filter);
-  ipt.laplacian = static_cast<int>(m->getLaplacian(r,c));
-  ipts.push_back(ipt);
-  */
-
-  // Do the interpolation
-  double xi = 0, xr = 0, xc = 0;
-
+  // get the step distance between filters
+  // check the middle filter is mid way between top and bottom
+  int filterStep = (m->filter - b->filter);
+  assert(filterStep > 0 && t->filter - m->filter == m->filter - b->filter);
+ 
   // Get the offsets to the actual location of the extremum
+  double xi = 0, xr = 0, xc = 0;
   interpolateStep(r, c, t, m, b, &xi, &xr, &xc );
 
   // If point is sufficiently close to the actual extremum
-  //if( fabs( xi ) < 0.5f  &&  fabs( xr ) < 0.5f  &&  fabs( xc ) < 0.5f )
+  if( fabs( xi ) < 0.5f  &&  fabs( xr ) < 0.5f  &&  fabs( xc ) < 0.5f )
   {
     Ipoint ipt;
     ipt.x = static_cast<float>((c + xc) * t->step);
     ipt.y = static_cast<float>((r + xr) * t->step);
-    ipt.scale = static_cast<float>((0.1333f) * m->filter);
-    ipt.laplacian = static_cast<int>(m->getLaplacian(r,c));
+    ipt.scale = static_cast<float>((0.1333f) * (m->filter + xi * filterStep));
+    ipt.laplacian = static_cast<int>(m->getLaplacian(r,c,t));
     ipts.push_back(ipt);
   }
 }
@@ -324,9 +318,9 @@ CvMat* FastHessian::deriv3D(int r, int c, ResponseLayer *t, ResponseLayer *m, Re
   CvMat* dI;
   double dx, dy, ds;
 
-  dx = m->getResponse(r, c + 1, t) - m->getResponse(r, c - 1, t) / 2.0;
-  dy = m->getResponse(r + 1, c, t) - m->getResponse(r - 1, c, t) / 2.0;
-  ds = t->getResponse(r, c) - b->getResponse(r, c, t) / 2.0;
+  dx = (m->getResponse(r, c + 1, t) - m->getResponse(r, c - 1, t)) / 2.0;
+  dy = (m->getResponse(r + 1, c, t) - m->getResponse(r - 1, c, t)) / 2.0;
+  ds = (t->getResponse(r, c) - b->getResponse(r, c, t)) / 2.0;
   
   dI = cvCreateMat( 3, 1, CV_64FC1 );
   cvmSet( dI, 0, 0, dx );
