@@ -49,23 +49,23 @@ int main(void)
 
 //-------------------------------------------------------
 
-
 int mainImage(void)
 {
   // Declare Ipoints and other stuff
   IpVec ipts;
-  IplImage *img=cvLoadImage("Images/blob.jpg");
+  IplImage *img=cvLoadImage("Images/sf.jpg");
 
-  clock_t start = clock();
   // Detect and describe interest points in the image
-  surfDetDes(img, ipts, false, 4, 4, 2, 0.0008f); 
+  clock_t start = clock();
+  surfDetDes(img, ipts, false, 4, 4, 2, 0.0004f); 
   clock_t end = clock();
 
-  std::cout<< "OpenSURF took: " << end - start << " clocks" << std::endl;
+  std::cout<< "OpenSURF found: " << ipts.size() << " interest points" << std::endl;
+  std::cout<< "OpenSURF took: " << float(end - start) / CLOCKS_PER_SEC  << " seconds" << std::endl;
 
   // Draw the detected points
   drawIpoints(img, ipts);
-
+  
   // Display the result
   showImage(img);
 
