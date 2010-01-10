@@ -17,7 +17,7 @@
 #include <vector>
 
 class ResponseLayer;
-static const int OCTAVES = 4;
+static const int OCTAVES = 5;
 static const int INTERVALS = 4;
 static const float THRES = 0.0004f;
 static const int INIT_SAMPLE = 2;

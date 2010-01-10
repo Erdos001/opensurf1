@@ -94,7 +94,7 @@ void FastHessian::setIntImage(IplImage *img)
 void FastHessian::getIpoints()
 {
   // filter index map
-  static const int filter_map [OCTAVES][INTERVALS] = {{0,1,2,3}, {1,3,4,5}, {3,5,6,7}, {5,7,8,9}};
+  static const int filter_map [OCTAVES][INTERVALS] = {{0,1,2,3}, {1,3,4,5}, {3,5,6,7}, {5,7,8,9}, {7,9,10,11}};
 
   // Clear the vector of exisiting ipts
   ipts.clear();
@@ -135,6 +135,7 @@ void FastHessian::buildResponseMap()
   // Oct2: 15, 27, 39, 51
   // Oct3: 27, 51, 75, 99
   // Oct4: 51, 99, 147,195
+  // Oct5: 99, 195,291,387
 
   // clear any existing response layers
   responseMap.clear();
@@ -169,6 +170,12 @@ void FastHessian::buildResponseMap()
   {
     responseMap.push_back(new ResponseLayer(w/8, h/8, s*8, 147));
     responseMap.push_back(new ResponseLayer(w/8, h/8, s*8, 195));
+  }
+
+  if (octaves >= 5)
+  {
+    responseMap.push_back(new ResponseLayer(w/16, h/16, s*16, 291));
+    responseMap.push_back(new ResponseLayer(w/16, h/16, s*16, 387));
   }
 
   // Extract responses from the image
