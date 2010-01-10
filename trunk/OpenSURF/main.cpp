@@ -57,7 +57,7 @@ int mainImage(void)
 
   // Detect and describe interest points in the image
   clock_t start = clock();
-  surfDetDes(img, ipts, false, 4, 4, 2, 0.0004f); 
+  surfDetDes(img, ipts, false, 5, 4, 2, 0.0004f); 
   clock_t end = clock();
 
   std::cout<< "OpenSURF found: " << ipts.size() << " interest points" << std::endl;
