@@ -54,7 +54,7 @@ FastHessian::~FastHessian()
 {
   for (unsigned int i = 0; i < responseMap.size(); ++i)
   {
-    if (responseMap[i]) free(responseMap[i]);
+    delete responseMap[i];
   }
 }
 
@@ -136,7 +136,9 @@ void FastHessian::buildResponseMap()
   // Oct4: 51, 99, 147,195
   // Oct5: 99, 195,291,387
 
-  // clear any existing response layers
+  // deallocat memory and clear any existing response layers
+  for(unsigned int i = 0; i < responseMap.size(); ++i)  
+    delete responseMap[i];
   responseMap.clear();
 
   // Get image attributes
