@@ -8,7 +8,6 @@
 *                                                          *
 ************************************************************/
 
-#include "cv.h"
 #include "integral.h"
 #include "ipoint.h"
 #include "utils.h"
