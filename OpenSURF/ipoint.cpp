@@ -1,4 +1,8 @@
-#include "cv.h"
+#if defined(__APPLE__) && defined(USE_OPENCV_FRAMEWORK)
+  #include <OpenCV/cv.h>
+#else
+  #include <cv.h>
+#endif
 
 #include <vector>
 
