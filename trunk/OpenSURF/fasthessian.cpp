@@ -136,7 +136,7 @@ void FastHessian::buildResponseMap()
   // Oct4: 51, 99, 147,195
   // Oct5: 99, 195,291,387
 
-  // deallocat memory and clear any existing response layers
+  // Deallocate memory and clear any existing response layers
   for(unsigned int i = 0; i < responseMap.size(); ++i)  
     delete responseMap[i];
   responseMap.clear();
