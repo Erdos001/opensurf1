@@ -11,12 +11,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#if defined(__APPLE__) && defined(USE_OPENCV_FRAMEWORK)
-  #include <OpenCV/cv.h>
-#else
-  #include <cv.h>
-#endif
-
+#include <cv.h>
 #include "ipoint.h"
 
 #include <vector>

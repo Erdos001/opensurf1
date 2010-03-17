@@ -11,13 +11,8 @@
 #ifndef SURFLIB_H
 #define SURFLIB_H
 
-#if defined(__APPLE__) && defined(USE_OPENCV_FRAMEWORK)
-  #include <OpenCV/cv.h>
-  #include <OpenCV/highgui.h>
-#else
-  #include <cv.h>
-  #include <highgui.h>
-#endif
+#include <cv.h>
+#include <highgui.h>
 
 #include "integral.h"
 #include "fasthessian.h"
