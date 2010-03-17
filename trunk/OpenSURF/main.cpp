@@ -51,30 +51,13 @@ int main(void)
 
 int mainImage(void)
 {
-  // Initialise a writer device
-  CvVideoWriter *writer = 0;
-  int isColor = 1;
-  int fps     = 25;  // or 30
-  int frameW  = 640; // 744 for firewire cameras
-  int frameH  = 480; // 480 for firewire cameras
-  writer=cvCreateVideoWriter("c:\\vid.avi",CV_FOURCC('D','I','V','X'),
-    fps,cvSize(frameW,frameH),isColor);
-
   // Declare Ipoints and other stuff
   IpVec ipts;
   IplImage *img=cvLoadImage("Images/sf.jpg");
 
   // Detect and describe interest points in the image
   clock_t start = clock();
-  for (float i = 0; i < 1; i += 0.01f)
-  {
-    surfDetDes(img, ipts, false, 2, 4, 2, i); 
-
-    // Add the frame to the file
-    cvWriteFrame(writer,img);
-    
-    std::cout << i << std::endl;
-  }
+  surfDetDes(img, ipts, false, 5, 4, 2, 0.0004f); 
   clock_t end = clock();
 
   std::cout<< "OpenSURF found: " << ipts.size() << " interest points" << std::endl;
@@ -84,9 +67,8 @@ int mainImage(void)
   drawIpoints(img, ipts);
   
   // Display the result
-  showImage(img);
+  //showImage(img);
 
-  cvReleaseVideoWriter( &writer );
   return 0;
 }
 
@@ -96,15 +78,6 @@ int mainImage(void)
 
 int mainVideo(void)
 {
-  // Initialise a writer device
-  CvVideoWriter *writer = 0;
-  int isColor = 1;
-  int fps     = 25;  // or 30
-  int frameW  = 640; // 744 for firewire cameras
-  int frameH  = 480; // 480 for firewire cameras
-  writer=cvCreateVideoWriter("out.avi",CV_FOURCC('D','I','V','X'),
-    fps,cvSize(frameW,frameH),isColor);
-
   // Initialise capture device
   CvCapture* capture = cvCaptureFromCAM( CV_CAP_ANY );
   if(!capture) error("No Capture");
@@ -123,7 +96,7 @@ int mainVideo(void)
     img = cvQueryFrame(capture);
 
     // Extract surf points
-    surfDetDes(img, ipts, true, 3, 4, 2, 0.004f);    
+    surfDetDes(img, ipts, false, 4, 4, 2, 0.004f);    
 
     // Draw the detected points
     drawIpoints(img, ipts);
@@ -134,14 +107,10 @@ int mainVideo(void)
     // Display the result
     cvShowImage("OpenSURF", img);
 
-    // Add the frame to the file
-    cvWriteFrame(writer,img);      
-
     // If ESC key pressed exit loop
     if( (cvWaitKey(10) & 255) == 27 ) break;
   }
 
-  cvReleaseVideoWriter( &writer );
   cvReleaseCapture( &capture );
   cvDestroyWindow( "OpenSURF" );
   return 0;

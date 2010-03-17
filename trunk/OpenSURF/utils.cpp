@@ -8,12 +8,7 @@
 *                                                          *
 ************************************************************/
 
-#if defined(__APPLE__) && defined(USE_OPENCV_FRAMEWORK)
-  #include <OpenCV/highgui.h>
-#else
-  #include <highgui.h>
-#endif
-
+#include <highgui.h>
 #include <iostream>
 #include <fstream>
 #include <time.h>

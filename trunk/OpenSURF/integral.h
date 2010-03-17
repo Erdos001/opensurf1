@@ -22,11 +22,7 @@
   #undef max
 #endif
 
-#if defined(__APPLE__) && defined(USE_OPENCV_FRAMEWORK)
-  #include <OpenCV/cv.h>
-#else
-  #include <cv.h>
-#endif
+#include <cv.h>
 
 //! Computes the integral image of image img.  Assumes source image to be a 
 //! 32-bit floating point.  Returns IplImage in 32-bit float form.
