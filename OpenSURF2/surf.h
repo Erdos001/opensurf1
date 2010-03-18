@@ -1,7 +1,8 @@
 /*********************************************************** 
-*  --- OpenSURF ---                                        *
+*  --- OpenSURF2 ---                                       *
 *  This library is distributed under the GNU GPL. Please   *
-*  contact chris.evans@irisys.co.uk for more information.  *
+*  use the contact form at http://www.chrisevansdev.com    *
+*  for more information.                                   *
 *                                                          *
 *  C. Evans, Research Into Robust Visual Features,         *
 *  MSc University of Bristol, 2008.                        *

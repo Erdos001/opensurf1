@@ -1,7 +1,8 @@
 /*********************************************************** 
-*  --- OpenSURF2 ---                                        *
+*  --- OpenSURF2 ---                                       *
 *  This library is distributed under the GNU GPL. Please   *
-*  contact chris.evans@irisys.co.uk for more information.  *
+*  use the contact form at http://www.chrisevansdev.com    *
+*  for more information.                                   *
 *                                                          *
 *  C. Evans, Research Into Robust Visual Features,         *
 *  MSc University of Bristol, 2008.                        *
@@ -46,33 +47,6 @@ int main(void)
   if (PROCEDURE == 6) return mainKmeans();
 }
 
-
-//-------------------------------------------------------
-
-// getting to grips with avi writing.
-// just need to link to capture to produce some useful demos!
-int mainWriteAviTest(void)
-{
-  // Declare Ipoints and other stuff
-  IplImage *img=cvLoadImage("Images/sf.jpg");
-
-  // Detect and describe interest points in the image
-  int isColor = 1;
-  int fps     = 25;
-  int frameW  = 640;
-  int frameH  = 437;
-  cv::VideoWriter vw("c:\\out.avi", CV_FOURCC('D','I','V','X'),
-      fps,cvSize(frameW,frameH),isColor);
-
-  for(int i = 0; i < 640; ++i)
-  {
-    cvCircle(img, cvPoint(i, 240), 2, cvScalar(255,255,255), 3);
-    vw << img;
-  }
-
-  return 0;
-}
-
 //-------------------------------------------------------
 
 int mainImage(void)
@@ -93,7 +67,7 @@ int mainImage(void)
   drawIpoints(img, ipts);
   
   // Display the result
-  //showImage(img);
+  showImage(img);
 
   return 0;
 }
@@ -105,6 +79,9 @@ int mainVideo(void)
   // Initialise capture device
   CvCapture* capture = cvCaptureFromCAM( CV_CAP_ANY );
   if(!capture) error("No Capture");
+
+  // Initialise video writer
+  //cv::VideoWriter vw("c:\\out.avi", CV_FOURCC('D','I','V','X'),10,cvSize(320,240),1);
 
   // Create a window 
   cvNamedWindow("OpenSURF", CV_WINDOW_AUTOSIZE );
@@ -124,6 +101,9 @@ int mainVideo(void)
 
     // Draw the detected points
     drawIpoints(img, ipts);
+
+    // Write the frame to video
+    //vw << img;
 
     // Draw the FPS figure
     drawFPS(img);
