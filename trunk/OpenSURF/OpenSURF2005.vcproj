@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="OpenSURF"
+	Name="OpenSURF2005"
 	ProjectGUID="{45C52AD1-9AD2-46BC-96A2-E302AF7CC982}"
 	RootNamespace="OpenSURF12"
 	Keyword="Win32Proj"
@@ -94,7 +94,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="$(ProjectDir)\vs2005\$(ConfigurationName)"
-			IntermediateDirectory="$(ProjectDir)\vs2005\$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)\vs2005\$(ConfigurationName)\bin"
 			ConfigurationType="1"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
