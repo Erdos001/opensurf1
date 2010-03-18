@@ -1,5 +1,5 @@
 /*********************************************************** 
-*  --- OpenSURF2 ---                                       *
+*  --- OpenSURF ---                                       *
 *  This library is distributed under the GNU GPL. Please   *
 *  use the contact form at http://www.chrisevansdev.com    *
 *  for more information.                                   *
@@ -24,28 +24,7 @@
 //  - 3 to match find an object in an image (work in progress)
 //  - 4 to display moving features (work in progress)
 //  - 5 to show matches between static images
-#define PROCEDURE 1
-
-//-------------------------------------------------------
-
-int mainImage(void);
-int mainVideo(void);
-int mainMatch(void);
-int mainMotionPoints(void);
-int mainStaticMatch(void);
-int mainKmeans(void);
-
-//-------------------------------------------------------
-
-int main(void) 
-{
-  if (PROCEDURE == 1) return mainImage();
-  if (PROCEDURE == 2) return mainVideo();
-  if (PROCEDURE == 3) return mainMatch();
-  if (PROCEDURE == 4) return mainMotionPoints();
-  if (PROCEDURE == 5) return mainStaticMatch();
-  if (PROCEDURE == 6) return mainKmeans();
-}
+#define PROCEDURE 2
 
 //-------------------------------------------------------
 
@@ -82,6 +61,7 @@ int mainVideo(void)
 
   // Initialise video writer
   //cv::VideoWriter vw("c:\\out.avi", CV_FOURCC('D','I','V','X'),10,cvSize(320,240),1);
+  //vw << img;
 
   // Create a window 
   cvNamedWindow("OpenSURF", CV_WINDOW_AUTOSIZE );
@@ -101,9 +81,6 @@ int mainVideo(void)
 
     // Draw the detected points
     drawIpoints(img, ipts);
-
-    // Write the frame to video
-    //vw << img;
 
     // Draw the FPS figure
     drawFPS(img);
@@ -310,4 +287,16 @@ int mainKmeans(void)
   }
 
   return 0;
+}
+
+//-------------------------------------------------------
+
+int main(void) 
+{
+  if (PROCEDURE == 1) return mainImage();
+  if (PROCEDURE == 2) return mainVideo();
+  if (PROCEDURE == 3) return mainMatch();
+  if (PROCEDURE == 4) return mainMotionPoints();
+  if (PROCEDURE == 5) return mainStaticMatch();
+  if (PROCEDURE == 6) return mainKmeans();
 }
