@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="OpenSURF2"
+	Name="OpenSURF2008"
 	ProjectGUID="{C18FFDC6-35F1-41E4-BD28-98F891E30F32}"
 	RootNamespace="OpenSURF2"
 	TargetFrameworkVersion="196613"
@@ -85,8 +85,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(ProjectDir)\out\$(ConfigurationName)"
-			IntermediateDirectory="$(ProjectDir)\bin\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)\vs2008\$(ConfigurationName)"
+			IntermediateDirectory="$(ProjectDir)\vs2008\$(ConfigurationName)\bin"
 			ConfigurationType="1"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
@@ -225,12 +225,6 @@
 				RelativePath=".\utils.h"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
 		</Filter>
 	</Files>
 	<Globals>
