@@ -177,27 +177,27 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\fasthessian.cpp"
+				RelativePath=".\src\fasthessian.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\integral.cpp"
+				RelativePath=".\src\integral.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ipoint.cpp"
+				RelativePath=".\src\ipoint.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\main.cpp"
+				RelativePath=".\src\main.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\surf.cpp"
+				RelativePath=".\src\surf.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\utils.cpp"
+				RelativePath=".\src\utils.cpp"
 				>
 			</File>
 		</Filter>
@@ -207,35 +207,35 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\fasthessian.h"
+				RelativePath=".\src\fasthessian.h"
 				>
 			</File>
 			<File
-				RelativePath=".\integral.h"
+				RelativePath=".\src\integral.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ipoint.h"
+				RelativePath=".\src\ipoint.h"
 				>
 			</File>
 			<File
-				RelativePath=".\kmeans.h"
+				RelativePath=".\src\kmeans.h"
 				>
 			</File>
 			<File
-				RelativePath=".\responselayer.h"
+				RelativePath=".\src\responselayer.h"
 				>
 			</File>
 			<File
-				RelativePath=".\surf.h"
+				RelativePath=".\src\surf.h"
 				>
 			</File>
 			<File
-				RelativePath=".\surflib.h"
+				RelativePath=".\src\surflib.h"
 				>
 			</File>
 			<File
-				RelativePath=".\utils.h"
+				RelativePath=".\src\utils.h"
 				>
 			</File>
 		</Filter>
