@@ -1,5 +1,5 @@
 /*********************************************************** 
-*  --- OpenSURF2 ---                                       *
+*  --- OpenSURF ---                                       *
 *  This library is distributed under the GNU GPL. Please   *
 *  use the contact form at http://www.chrisevansdev.com    *
 *  for more information.                                   *
