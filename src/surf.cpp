@@ -208,8 +208,8 @@ void Surf::getDescriptor(bool bUpright)
 
       j = j - 4;
 
-      ix = i + 5;
-      jx = j + 5;
+      ix = i + 6;
+      jx = j + 6;
 
       xs = fRound(x + ( -jx*scale*si + ix*scale*co));
       ys = fRound(y + ( jx*scale*co + ix*scale*si));

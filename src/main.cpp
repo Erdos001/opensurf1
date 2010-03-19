@@ -24,7 +24,39 @@
 //  - 3 to match find an object in an image (work in progress)
 //  - 4 to display moving features (work in progress)
 //  - 5 to show matches between static images
-#define PROCEDURE 2
+//  - 6 to test the kmeans algorithm
+//  - 7 to read from video file
+#define PROCEDURE 7
+
+//-------------------------------------------------------
+
+int mainReadVideo(void)
+{
+  // Initialise video reader/writer
+  cv::VideoCapture vc("imgs/ski3.mpg");
+  cv::VideoWriter vw("imgs/out3.avi", CV_FOURCC('D','I','V','X'),10,cvSize(640,480),1);
+  
+  if (!vc.isOpened())
+    return 0;
+
+  cv::Mat frame;
+  IplImage img;
+  IpVec ipts;
+  while(vc.grab())
+  {
+    vc >> frame;
+    img = (IplImage)frame;
+    
+    surfDetDes(&img, ipts, true, 4, 4, 2, 0.002f); 
+    drawIpoints(&img, ipts);
+    
+    vw << &img;
+  }
+
+  
+
+  return 0;
+}
 
 //-------------------------------------------------------
 
@@ -58,10 +90,6 @@ int mainVideo(void)
   // Initialise capture device
   CvCapture* capture = cvCaptureFromCAM( CV_CAP_ANY );
   if(!capture) error("No Capture");
-
-  // Initialise video writer
-  //cv::VideoWriter vw("c:\\out.avi", CV_FOURCC('D','I','V','X'),10,cvSize(320,240),1);
-  //vw << img;
 
   // Create a window 
   cvNamedWindow("OpenSURF", CV_WINDOW_AUTOSIZE );
@@ -299,4 +327,5 @@ int main(void)
   if (PROCEDURE == 4) return mainMotionPoints();
   if (PROCEDURE == 5) return mainStaticMatch();
   if (PROCEDURE == 6) return mainKmeans();
+  if (PROCEDURE == 7) return mainReadVideo();
 }
