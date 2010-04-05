@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSURFcs", "OpenSURFcs\OpenSURFcs.csproj", "{E6B624C9-59BB-4E32-893E-161DF6D2C7FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSURFDemo", "OpenSURFDemo\OpenSURFDemo.csproj", "{BD5A600A-53B0-43DD-B93B-5418CACD92C3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E6B624C9-59BB-4E32-893E-161DF6D2C7FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6B624C9-59BB-4E32-893E-161DF6D2C7FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6B624C9-59BB-4E32-893E-161DF6D2C7FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6B624C9-59BB-4E32-893E-161DF6D2C7FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD5A600A-53B0-43DD-B93B-5418CACD92C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD5A600A-53B0-43DD-B93B-5418CACD92C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD5A600A-53B0-43DD-B93B-5418CACD92C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD5A600A-53B0-43DD-B93B-5418CACD92C3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
