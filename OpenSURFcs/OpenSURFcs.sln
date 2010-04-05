@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSURFcs", "OpenSURFcs\OpenSURFcs.csproj", "{E6B624C9-59BB-4E32-893E-161DF6D2C7FB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSURFDemo", "OpenSURFDemo\OpenSURFDemo.csproj", "{BD5A600A-53B0-43DD-B93B-5418CACD92C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSURFcs", "OpenSURFcs\OpenSURFcs.csproj", "{E6B624C9-59BB-4E32-893E-161DF6D2C7FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
