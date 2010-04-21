@@ -9,6 +9,7 @@
 *                                                          *
 ************************************************************/
 
+#include <memory.h>
 
 //#define RL_DEBUG  // un-comment to test response layer
 
