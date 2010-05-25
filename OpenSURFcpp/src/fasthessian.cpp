@@ -258,7 +258,7 @@ int FastHessian::isExtremum(int r, int c, ResponseLayer *t, ResponseLayer *m, Re
       // if any response in 3x3x3 is greater candidate not maximum
       if (
         t->getResponse(r+rr, c+cc) >= candidate ||
-        ((rr != 0 && cc != 0) && m->getResponse(r+rr, c+cc, t) >= candidate) ||
+        ((rr != 0 || cc != 0) && m->getResponse(r+rr, c+cc, t) >= candidate) ||
         b->getResponse(r+rr, c+cc, t) >= candidate
         ) 
         return 0;
