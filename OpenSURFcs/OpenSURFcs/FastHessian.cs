@@ -210,7 +210,7 @@ namespace OpenSURFcs
     private void buildResponseLayer(ResponseLayer rl)
     {
       int step = rl.step;                      // step size for this filter
-      int b = (rl.filter - 1) / 2 + 1;         // border for this filter
+      int b = (rl.filter - 1) / 2;             // border for this filter
       int l = rl.filter / 3;                   // lobe for this filter (filter size / 3)
       int w = rl.filter;                       // filter size
       float inverse_area = 1f / (w * w);       // normalisation factor
